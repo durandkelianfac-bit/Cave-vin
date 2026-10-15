@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cave">
+<meta name="theme-color" content="#6b1630">
+<title>Cave</title>
+<style>
+:root{
+  --wine:#6b1630; --wine2:#85213f; --wine-d:#4a0e22;
+  --rose:#f4d6d9; --rose2:#fbe9ea; --cream:#fdf4ea; --paper:#fff8f3;
+  --ink:#2a1218; --muted:#a58a90; --sage:#b7d4a8; --gold:#f3c969;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:-apple-system,"SF Pro Rounded","SF Pro Text",system-ui,sans-serif;touch-action:manipulation}
+body{min-height:100dvh}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink)}
+[hidden]{display:none!important}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--paper)}
+
+/* ---------- Accueil ---------- */
+.hero{background:var(--wine);border-radius:0 0 64px 0;padding:calc(var(--safe-t) + 14px) 22px 40px;position:relative;min-height:330px;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:3}
+.logo{font-weight:700;font-size:22px;color:var(--rose);letter-spacing:.2px}
+.ic-row{display:flex;gap:10px}
+.circle{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--rose)}
+.circle.filled{background:rgba(244,214,217,.2)}
+.circle svg{width:22px;height:22px}
+.search{width:100%;margin-top:12px;border-radius:16px;border:0;padding:13px 16px;background:var(--rose2);position:relative;z-index:3}
+.hero h1{margin:58px 0 0;font-size:70px;line-height:.95;font-weight:800;letter-spacing:-2px;color:var(--rose);position:relative;z-index:2}
+.hero-sub{margin-top:14px;color:var(--rose);opacity:.85;font-size:14px;position:relative;z-index:2}
+.hero-bottle{position:absolute;right:8px;top:70px;z-index:1;transform:rotate(16deg);filter:drop-shadow(0 18px 18px rgba(0,0,0,.35))}
+.hero-bottle svg{height:250px;width:auto;display:block}
+.tabs{display:flex;gap:26px;overflow-x:auto;padding:26px 22px 8px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{position:relative;padding-top:14px;font-weight:800;font-size:20px;line-height:1;color:#c3adb1;white-space:nowrap}
+.tab.on{color:var(--ink)}
+.tab i{position:absolute;top:-4px;left:0;min-width:22px;height:22px;border-radius:11px;padding:0 6px;background:#dccbce;color:#fff;font:700 11px/22px system-ui;text-align:center;font-style:normal}
+.tab.on i{background:#1b0b10}
+#list{padding:8px 0 130px}
+.card{position:relative;margin:16px 0 16px 64px;background:var(--wine);border-radius:30px 0 0 30px;
+  padding:16px 14px 16px 46px;min-height:112px;display:flex;align-items:center;gap:10px;color:var(--rose)}
+.card.empty{opacity:.55}
+.cbottle{position:absolute;left:-36px;top:50%;transform:translateY(-50%) rotate(-6deg);filter:drop-shadow(0 8px 8px rgba(40,8,18,.35))}
+.cbottle svg{height:122px;width:auto;display:block}
+.cinfo{flex:1;min-width:0}
+.cinfo h3{margin:0;font-size:18px;line-height:1.15;font-weight:800;color:var(--rose);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cinfo p{margin:3px 0 8px;font-size:12.5px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid rgba(244,214,217,.45);border-radius:10px;padding:3px 8px;font-size:11.5px;font-weight:600;color:var(--rose)}
+.chip.st-ok{background:var(--sage);border-color:var(--sage);color:#233b1c}
+.chip.st-soon{background:var(--gold);border-color:var(--gold);color:#4a3306}
+.chip.st-past{background:#e58a8a;border-color:#e58a8a;color:#4a0e0e}
+.chip.st-empty{opacity:.7}
+.plus{width:52px;height:52px;border-radius:16px;background:var(--rose2);color:var(--wine);display:grid;place-items:center;flex:none}
+.plus svg{width:24px;height:24px}
+.plus:active{transform:scale(.94)}
+.emptybox{margin:40px 28px;text-align:center;color:var(--muted)}
+.emptybox b{display:block;color:var(--ink);font-size:20px;margin-bottom:8px}
+.fabwrap{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;pointer-events:none;z-index:10;display:flex;justify-content:flex-end;padding:0 18px calc(18px + var(--safe-b))}
+.fab{pointer-events:auto;display:flex;align-items:center;gap:8px;background:var(--wine);color:var(--rose);border-radius:22px;padding:16px 22px;font-weight:800;font-size:16px;box-shadow:0 10px 24px rgba(107,22,48,.4)}
+.fab svg{width:20px;height:20px}
+
+/* ---------- Fiche ---------- */
+.detail{position:fixed;left:0;right:0;top:0;bottom:0;max-width:480px;margin:0 auto;background:var(--wine);overflow-y:auto;z-index:20;overscroll-behavior:contain}
+.dtop{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-t) + 14px) 14px 6px 14px}
+.back{display:flex;align-items:center;gap:4px;color:var(--rose);font-weight:700;font-size:17px;padding:8px 10px}
+.back svg{width:20px;height:20px}
+.dgrid{display:grid;grid-template-columns:92px 1fr;gap:4px;align-items:start;margin-top:8px}
+.strip{background:var(--paper);border-radius:0 30px 30px 0;padding:14px 0 14px 8px;max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.sitem{flex:none;height:96px;display:flex;align-items:center;justify-content:center;border-radius:28px 0 0 28px}
+.sitem svg{height:76px;width:auto;display:block;filter:drop-shadow(0 4px 4px rgba(40,8,18,.25))}
+.sitem.on{background:var(--wine)}
+.sitem.on svg{height:84px}
+.dmain{padding:0 18px 0 10px;color:var(--rose);min-width:0}
+.dbottle{height:290px;display:flex;justify-content:center;align-items:center}
+.dbottle svg{height:280px;width:auto;transform:rotate(9deg);filter:drop-shadow(0 22px 20px rgba(0,0,0,.4))}
+.dmain h2{margin:6px 0 4px;font-size:27px;line-height:1.1;font-weight:800;color:var(--rose)}
+.dsub{font-size:14px;opacity:.85;margin-bottom:12px}
+.dmain .chips{margin-bottom:14px}
+.dmain .desc{font-size:14px;line-height:1.5;opacity:.9;margin:0 0 14px}
+.score{display:flex;align-items:baseline;gap:6px;margin-bottom:6px}
+.score b{font-size:46px;line-height:1;font-weight:800;color:var(--rose)}
+.score span{opacity:.75;font-size:14px}
+.dpanel{background:var(--paper);border-radius:34px 34px 0 0;margin-top:26px;padding:26px 20px 30px;color:var(--ink);min-height:300px}
+.dpanel h4{margin:22px 0 10px;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:var(--wine2)}
+.dpanel h4:first-child{margin-top:0}
+.dpanel .chips .chip{border-color:#e6cfd2;color:var(--wine)}
+.dpanel .chips .chip.hit{background:var(--wine);border-color:var(--wine);color:var(--rose)}
+.win{position:relative;height:10px;border-radius:5px;background:#ecd9dc;margin:26px 4px 8px}
+.win .seg{position:absolute;top:0;bottom:0;border-radius:5px;background:var(--sage)}
+.win .now{position:absolute;top:-6px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:var(--wine);border:4px solid var(--paper);box-shadow:0 0 0 1px var(--wine)}
+.winl{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv div{background:var(--rose2);border-radius:16px;padding:10px 12px}
+.kv small{display:block;color:var(--muted);font-size:11.5px;margin-bottom:2px}
+.kv b{font-size:15px}
+.tcard{background:#fff;border:1.5px solid #f0dde0;border-radius:22px;padding:14px 16px;margin-bottom:12px}
+.thead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tscore{font-size:28px;font-weight:800;color:var(--wine)}
+.tscore small{font-size:13px;color:var(--muted);font-weight:600}
+.tmeta{font-size:12.5px;color:var(--muted)}
+.tcard p{margin:8px 0 0;font-size:14px;line-height:1.45}
+.tcard .chips{margin-top:8px}
+.tdel{color:var(--muted);font-size:12px;margin-top:8px;text-decoration:underline}
+.dbar{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;padding:14px 18px calc(14px + var(--safe-b));background:linear-gradient(rgba(255,248,243,0),var(--paper) 28%)}
+.btn{flex:1;background:var(--wine);color:var(--rose);border-radius:20px;padding:16px 20px;font-weight:800;font-size:16px;text-align:center}
+.btn.ghost{background:var(--rose2);color:var(--wine)}
+.stepper{display:flex;align-items:center;background:var(--rose2);border-radius:20px;color:var(--wine)}
+.stepper button{width:44px;height:52px;font-size:22px;font-weight:800}
+.stepper b{min-width:24px;text-align:center}
+
+/* ---------- Feuilles ---------- */
+.backdrop{position:fixed;inset:0;background:rgba(30,8,16,.5);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
+.backdrop.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:480px;max-height:93dvh;overflow-y:auto;background:var(--cream);border-radius:32px 32px 0 0;z-index:41;transform:translateY(105%);transition:transform .3s;padding:10px 20px 0;overscroll-behavior:contain}
+.sheet.on{transform:none}
+.sheet:before{content:"";display:block;width:44px;height:5px;border-radius:3px;background:#dcc6ca;margin:0 auto 14px}
+.sh{margin:0 0 14px;font-size:24px;font-weight:800;color:var(--wine)}
+.form label,.lab{display:block;font-size:12.5px;font-weight:700;color:var(--wine2);margin-bottom:12px}
+.form label small{font-weight:500;color:var(--muted)}
+.form input,.form select,.form textarea{display:block;width:100%;margin-top:5px;border:0;background:var(--rose2);border-radius:14px;padding:12px 14px;font-weight:500;appearance:none;-webkit-appearance:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:.8fr 1fr 1.3fr;gap:10px}
+.typ{background:var(--rose2);border-radius:18px;padding:12px 14px;margin:-2px 0 14px;font-size:13px}
+.typ .chips{margin:6px 0}
+.typ .chip{border-color:#e6cfd2;color:var(--wine)}
+.sbar{position:sticky;bottom:0;display:flex;gap:10px;padding:14px 0 calc(16px + var(--safe-b));background:linear-gradient(rgba(253,244,234,0),var(--cream) 30%)}
+.seg2{display:grid;grid-template-columns:1fr 1fr;background:var(--rose2);border-radius:18px;padding:4px;margin-bottom:16px}
+.seg2 button{padding:11px;border-radius:14px;font-weight:800;color:var(--wine2)}
+.seg2 button.on{background:var(--wine);color:var(--rose)}
+.grp{background:#fff;border-radius:22px;padding:14px 16px;margin-bottom:12px}
+.gh{display:flex;justify-content:space-between;align-items:baseline}
+.gh b{font-size:16px;color:var(--wine)}
+.gh span{font-weight:800;color:var(--wine2)}
+.hint{margin:4px 0 4px;font-size:12.5px;color:var(--muted);line-height:1.4}
+.srow{margin-top:6px}
+.srow label{display:flex;justify-content:space-between;margin:6px 0 0;font-size:13.5px;font-weight:600;color:var(--ink)}
+.srow label em{font-style:normal;color:var(--muted);font-weight:600}
+.srow output{font-weight:800;color:var(--wine2);font-size:13px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;margin:2px 0;padding:0;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--wine) var(--p,0%),#ecd5d8 var(--p,0%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;border:7px solid var(--wine);margin-top:-10px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+input[type=range]::-moz-range-track{height:8px;border-radius:8px;background:#ecd5d8}
+input[type=range]::-moz-range-progress{height:8px;border-radius:8px;background:var(--wine)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#fff;border:7px solid var(--wine)}
+.desc3{margin-top:10px;padding-top:6px;border-top:1px dashed #ecd5d8}
+.aro{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.fam,.det{border:1.5px solid #ecd5d8;border-radius:12px;padding:7px 11px;font-size:13.5px;font-weight:600;color:var(--wine);background:#fff}
+.fam.on,.det.on{background:var(--wine);border-color:var(--wine);color:var(--rose)}
+.det{border-style:dashed}
+.dets{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;padding:10px;background:var(--rose2);border-radius:14px;width:100%}
+.tot{flex:1;display:flex;align-items:baseline;gap:6px;color:var(--wine)}
+.tot b{font-size:40px;line-height:1;font-weight:800}
+.tot span{font-size:13px;font-weight:700;color:var(--wine2)}
+.chk{display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600;margin:4px 0 8px}
+.chk input{width:22px;height:22px;accent-color:var(--wine)}
+textarea{resize:vertical}
+.stat4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat4 div{background:var(--wine);color:var(--rose);border-radius:20px;padding:14px 16px}
+.stat4 small{display:block;opacity:.75;font-size:12px}
+.stat4 b{font-size:26px;font-weight:800}
+.bar{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:13.5px}
+.bar span:first-child{width:112px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .tr{flex:1;height:10px;border-radius:5px;background:#ecd9dc;overflow:hidden}
+.bar .tr i{display:block;height:100%;background:var(--wine);border-radius:5px}
+.bar span:last-child{width:28px;text-align:right;font-weight:800;color:var(--wine)}
+.note{font-size:12.5px;color:var(--muted);line-height:1.45;margin:8px 0}
+.toast{position:fixed;left:50%;bottom:calc(100px + var(--safe-b));transform:translate(-50%,20px);background:#1b0b10;color:#fff;padding:11px 18px;border-radius:16px;font-size:14px;font-weight:600;z-index:60;opacity:0;pointer-events:none;transition:.25s;max-width:86vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+.qcol{display:flex;flex-direction:column;align-items:center;gap:1px;flex:none}
+.qcol b{font-size:24px;line-height:1;font-weight:800;color:var(--rose)}
+.qcol small{font-size:10.5px;opacity:.8;margin-bottom:7px}
+.qcol .plus{width:46px;height:46px;border-radius:14px}
+.qrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;font-weight:700;font-size:14px}
+.qrow .stepper button{height:42px}
+.prof .pb{background:var(--rose2);border-radius:18px;padding:13px 14px;margin-bottom:10px}
+.prof .pb>b{display:block;color:var(--wine);font-size:15px;margin-bottom:5px}
+.prof .pb p{margin:0 0 8px;font-size:14px;line-height:1.45}
+.prof .lvl{margin-top:9px}
+.prof .lvl small{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+.prof .chip{border-color:#e6cfd2;color:var(--wine);background:#fff}
+.prof .kv div{background:#fff}
+.fam.ty:after,.det.ty:after,.tdot:after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-left:7px;vertical-align:middle}
+.tdot:after{margin-left:0}
+.fam.on.ty:after,.det.on.ty:after{background:var(--gold)}
+.aitem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px;border-radius:18px;background:#fff;margin-bottom:8px}
+.adot{width:14px;height:36px;border-radius:7px;flex:none}
+.at{flex:1;min-width:0}
+.at b{display:block;font-size:15px;color:var(--ink)}
+.at small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aitem .chip{border-color:#e6cfd2;color:var(--wine);flex:none}
+.tabs2{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}
+.tabs2 button{padding:8px 14px;border-radius:14px;background:var(--rose2);font-weight:700;color:var(--wine2);white-space:nowrap}
+.tabs2 button.on{background:var(--wine);color:var(--rose)}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="home">
+    <div class="hero">
+      <div class="topbar">
+        <span class="logo">cave</span>
+        <div class="ic-row">
+          <button class="circle" id="btnAoc" aria-label="Appellations"></button>
+          <button class="circle" id="btnSearch" aria-label="Rechercher"></button>
+          <button class="circle filled" id="btnStats" aria-label="Statistiques"></button>
+        </div>
+      </div>
+      <input id="q" class="search" type="search" placeholder="Domaine, appellation, emplacement…" hidden>
+      <h1>Ma<br>cave</h1>
+      <div class="hero-sub" id="heroSub"></div>
+      <div class="hero-bottle" id="heroBottle"></div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+    <div id="list"></div>
+  </section>
+  <div class="fabwrap"><button class="fab" id="fab"></button></div>
+  <section class="detail" id="detail" hidden></section>
+</div>
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ============ Utilitaires ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const eur=n=>(Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' €';
+const IC={
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3V4z"/><path d="M5 17a3 3 0 013-3h10"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>'
+};
+
+/* ============ Données & stockage ============ */
+const KEY='cave_v1';
+let S={bottles:[]};
+try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);if(p&&Array.isArray(p.bottles))S=p;}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('Stockage bloqué : exporte ta cave dans Statistiques');}}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+const ST={tab:'all',q:'',open:null};
+const get=id=>S.bottles.find(b=>b.id===id);
+
+/* ============ Couleurs & bouteille ============ */
+const CNAME={R:'Rouge',B:'Blanc',S:'Rosé',P:'Bulles',L:'Doux'};
+const TABS=[['all','Tous'],['R','Rouge'],['B','Blanc'],['S','Rosé'],['P','Bulles'],['L','Doux']];
+const BC={R:['#2b0713','#6b1630','#2b0713'],B:['#6f7a3a','#bcc76e','#e6d9a0'],S:['#c9707c','#f2adb4','#f4d6d9'],P:['#2f3d22','#6f8040','#e6b655'],L:['#8f5e14','#e3a844','#7a1f3d']};
+const BP='M24 6H36V46C36 58 48 63 48 82V158Q48 168 38 168H22Q12 168 12 158V82C12 63 24 58 24 46Z';
+let gid=0;
+function bottleSVG(c,v){
+  const p=BC[c]||BC.R,id='g'+(++gid);
+  return '<svg viewBox="0 0 60 172" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" x2="1"><stop offset="0" stop-color="'+p[0]+'"/><stop offset=".5" stop-color="'+p[1]+'"/><stop offset="1" stop-color="'+p[0]+'"/></linearGradient></defs>'
+  +'<path d="'+BP+'" fill="url(#'+id+')"/><rect x="23" y="3" width="14" height="25" rx="2.5" fill="'+p[2]+'"/>'
+  +'<rect x="12" y="98" width="36" height="48" fill="#fdf4ea"/><rect x="17" y="106" width="26" height="2.4" rx="1.2" fill="#6b1630" opacity=".55"/>'
+  +'<text x="30" y="127" text-anchor="middle" font-size="9" font-weight="700" font-family="Georgia,serif" fill="#6b1630">'+esc(v||'NV')+'</text>'
+  +'<rect x="19" y="134" width="22" height="2" rx="1" fill="#6b1630" opacity=".35"/><rect x="17" y="64" width="4" height="96" rx="2" fill="#fff" opacity=".16"/></svg>';
+}
+(function touchIcon(){
+  try{
+    const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d');
+    x.fillStyle='#6b1630';x.fillRect(0,0,180,180);
+    x.translate(62,12);x.scale(.92,.92);x.fillStyle='#f4d6d9';x.fill(new Path2D(BP));
+    x.fillStyle='#6b1630';x.fillRect(12,98,36,48);x.fillStyle='#f4d6d9';x.fillRect(16,114,28,4);x.fillRect(16,124,28,4);
+    const l=document.createElement('link');l.rel='apple-touch-icon';l.href=c.toDataURL('image/png');document.head.appendChild(l);
+  }catch(e){}
+})();
+
+/* ============ Appellations françaises (profils typiques) ============ */
+// nom | région | couleur | cépages | arômes typiques au nez | garde min,max (années après le millésime) | style (voir ARCH)
+const AOC_RAW=[
+"Bourgogne (rouge)|Bourgogne|R|Pinot noir|cerise,fraise,framboise,sous-bois|2,6|PN1",
+"Bourgogne (blanc)|Bourgogne|B|Chardonnay|pomme,citron,beurre,noisette|2,5|CH1",
+"Chablis|Bourgogne|B|Chardonnay|citron,pomme,craie,iodé|3,10|CH2",
+"Chablis Premier Cru|Bourgogne|B|Chardonnay|citron,poire,craie,silex,iodé|5,14|CH2",
+"Meursault|Bourgogne|B|Chardonnay|noisette,beurre,miel,poire|5,12|CH3",
+"Puligny-Montrachet|Bourgogne|B|Chardonnay|citron,noisette,silex,beurre|6,15|CH3",
+"Chassagne-Montrachet (blanc)|Bourgogne|B|Chardonnay|noisette,amande,beurre,pêche|6,15|CH3",
+"Gevrey-Chambertin|Bourgogne|R|Pinot noir|cerise,mûre,poivre,sous-bois,réglisse|6,15|PN2",
+"Nuits-Saint-Georges|Bourgogne|R|Pinot noir|cerise,mûre,cuir,sous-bois,réglisse|7,16|PN2",
+"Pommard|Bourgogne|R|Pinot noir|cerise,prune,cuir,poivre|6,15|PN2",
+"Volnay|Bourgogne|R|Pinot noir|cerise,framboise,violette,rose|5,12|PN1",
+"Beaune (rouge)|Bourgogne|R|Pinot noir|cerise,fraise,poivre,sous-bois|5,12|PN1",
+"Santenay (rouge)|Bourgogne|R|Pinot noir|cerise,framboise,sous-bois|4,10|PN1",
+"Mercurey (rouge)|Bourgogne|R|Pinot noir|cerise,framboise,poivre,sous-bois|4,10|PN1",
+"Givry (rouge)|Bourgogne|R|Pinot noir|cerise,mûre,poivre|4,10|PN1",
+"Rully (blanc)|Bourgogne|B|Chardonnay|pomme,citron,acacia,noisette|3,8|CH1",
+"Mâcon-Villages|Bourgogne|B|Chardonnay|citron,pomme,acacia,tilleul|1,4|CH1",
+"Viré-Clessé|Bourgogne|B|Chardonnay|acacia,miel,pêche,pomme|2,6|CH1",
+"Saint-Véran|Bourgogne|B|Chardonnay|citron,pomme,acacia,silex|2,6|CH1",
+"Pouilly-Fuissé|Bourgogne|B|Chardonnay|citron,beurre,pêche,silex|3,10|CH3",
+"Crémant de Bourgogne|Bourgogne|P|Chardonnay, Pinot noir|pomme,citron,brioche|1,3|CREM",
+"Beaujolais|Beaujolais|R|Gamay|cerise,fraise,framboise|1,3|GA1",
+"Beaujolais-Villages|Beaujolais|R|Gamay|cerise,fraise,framboise,violette|1,4|GA1",
+"Brouilly|Beaujolais|R|Gamay|cerise,fraise,violette|2,5|GA1",
+"Côte de Brouilly|Beaujolais|R|Gamay|cerise,prune,violette,silex|3,8|GA2",
+"Fleurie|Beaujolais|R|Gamay|violette,rose,fraise,cerise|2,6|GA1",
+"Morgon|Beaujolais|R|Gamay|cerise,prune,poivre,fumé|3,8|GA2",
+"Moulin-à-Vent|Beaujolais|R|Gamay|prune,cerise,poivre,réglisse|4,12|GA2",
+"Juliénas|Beaujolais|R|Gamay|cerise,framboise,poivre|3,7|GA2",
+"Saint-Amour|Beaujolais|R|Gamay|cerise,fraise,rose|2,5|GA1",
+"Chénas|Beaujolais|R|Gamay|cerise,prune,violette,poivre|3,8|GA2",
+"Régnié|Beaujolais|R|Gamay|cerise,framboise,mûre|2,5|GA1",
+"Chiroubles|Beaujolais|R|Gamay|fraise,framboise,violette|1,4|GA1",
+"Côtes du Rhône (rouge)|Vallée du Rhône|R|Grenache, Syrah|cerise,fraise,poivre,thym,réglisse|2,6|SUD",
+"Crozes-Hermitage (rouge)|Vallée du Rhône|R|Syrah|mûre,cassis,poivre,violette,fumé|3,10|SY1",
+"Saint-Joseph (rouge)|Vallée du Rhône|R|Syrah|cassis,mûre,poivre,violette|4,12|SY1",
+"Cornas|Vallée du Rhône|R|Syrah|cassis,mûre,poivre,cuir,truffe|6,18|SY1",
+"Côte-Rôtie|Vallée du Rhône|R|Syrah|violette,framboise,poivre,fumé|8,20|SY1",
+"Hermitage (rouge)|Vallée du Rhône|R|Syrah|mûre,cassis,poivre,réglisse,cuir|8,25|SY1",
+"Condrieu|Vallée du Rhône|B|Viognier|pêche,acacia,chèvrefeuille,miel|2,6|VIO",
+"Châteauneuf-du-Pape (rouge)|Vallée du Rhône|R|Grenache, Syrah, Mourvèdre|cerise,prune,poivre,thym,réglisse,cuir|5,18|GR1",
+"Gigondas|Vallée du Rhône|R|Grenache, Syrah, Mourvèdre|cerise,prune,poivre,thym,réglisse|4,12|GR1",
+"Vacqueyras|Vallée du Rhône|R|Grenache, Syrah|cerise,mûre,poivre,thym|3,10|GR1",
+"Tavel|Vallée du Rhône|S|Grenache, Cinsault|fraise,cerise,poivre,thym|1,3|TAV",
+"Médoc|Bordeaux|R|Cabernet sauvignon, Merlot|cassis,cèdre,poivron,vanille|4,12|BXG",
+"Haut-Médoc|Bordeaux|R|Cabernet sauvignon, Merlot|cassis,cèdre,vanille,poivre|5,15|BXG",
+"Margaux|Bordeaux|R|Cabernet sauvignon, Merlot|cassis,violette,cèdre,vanille|8,25|BXG",
+"Pauillac|Bordeaux|R|Cabernet sauvignon, Merlot|cassis,cèdre,réglisse,fumé|8,30|BXG",
+"Saint-Julien|Bordeaux|R|Cabernet sauvignon, Merlot|cassis,cèdre,cuir,vanille|8,28|BXG",
+"Saint-Estèphe|Bordeaux|R|Cabernet sauvignon, Merlot|cassis,mûre,réglisse,cèdre|8,25|BXG",
+"Saint-Émilion|Bordeaux|R|Merlot, Cabernet franc|prune,mûre,vanille,cacao,truffe|5,20|BXD",
+"Pomerol|Bordeaux|R|Merlot, Cabernet franc|prune,truffe,cacao,violette|8,25|BXD",
+"Pessac-Léognan (rouge)|Bordeaux|R|Cabernet sauvignon, Merlot|cassis,fumé,cèdre,cuir|6,20|BXG",
+"Pessac-Léognan (blanc)|Bordeaux|B|Sauvignon, Sémillon|pamplemousse,citron,vanille,beurre,buis|4,12|BXB",
+"Bordeaux (rouge)|Bordeaux|R|Merlot, Cabernet sauvignon|cassis,prune,cèdre|2,6|BXS",
+"Bordeaux supérieur|Bordeaux|R|Merlot, Cabernet sauvignon|cassis,prune,cèdre,vanille|3,8|BXS",
+"Entre-Deux-Mers|Bordeaux|B|Sauvignon, Sémillon|pamplemousse,citron,herbe coupée,buis|1,3|SB1",
+"Sauternes|Bordeaux|L|Sémillon, Sauvignon|miel,abricot sec,orange,cire|8,40|LIQ",
+"Sancerre (blanc)|Loire|B|Sauvignon|pamplemousse,citron,herbe coupée,buis,silex|1,5|SB1",
+"Sancerre (rouge)|Loire|R|Pinot noir|cerise,fraise,sous-bois|2,6|PN1",
+"Pouilly-Fumé|Loire|B|Sauvignon|pamplemousse,fumé,silex,herbe coupée|2,6|SB1",
+"Quincy|Loire|B|Sauvignon|citron,pamplemousse,herbe coupée|1,3|SB1",
+"Vouvray|Loire|B|Chenin|coing,pomme,miel,craie|3,15|CHN1",
+"Savennières|Loire|B|Chenin|coing,miel,cire,craie|5,20|CHN1",
+"Muscadet Sèvre-et-Maine|Loire|B|Melon de Bourgogne|citron,iodé,pomme|1,4|MUS",
+"Chinon (rouge)|Loire|R|Cabernet franc|framboise,poivron,violette,cassis|3,10|CF",
+"Bourgueil|Loire|R|Cabernet franc|framboise,cassis,poivron,violette|4,12|CF",
+"Saumur-Champigny|Loire|R|Cabernet franc|framboise,cassis,violette,poivre|3,8|CF",
+"Crémant de Loire|Loire|P|Chenin, Cabernet franc|pomme,coing,brioche|1,3|CREM",
+"Alsace Riesling|Alsace|B|Riesling|citron,pomme,silex,pétrole|3,15|RIE",
+"Alsace Gewurztraminer|Alsace|B|Gewurztraminer|litchi,rose,cannelle,miel|3,12|GEW",
+"Alsace Pinot gris|Alsace|B|Pinot gris|poire,miel,fumé,fruits secs|3,10|PGR",
+"Alsace Pinot noir|Alsace|R|Pinot noir|cerise,framboise,sous-bois|2,6|PN1",
+"Crémant d'Alsace|Alsace|P|Pinot blanc, Riesling, Pinot gris|pomme,brioche,citron|1,4|CREM",
+"Champagne Brut|Champagne|P|Chardonnay, Pinot noir, Meunier|pomme,citron,brioche,amande|1,6|CHAMP",
+"Champagne Blanc de blancs|Champagne|P|Chardonnay|citron,brioche,craie,amande|3,10|CHAMP",
+"Côtes de Provence (rosé)|Provence|S|Grenache, Cinsault, Syrah|fraise,pamplemousse,pêche,thym|1,2|ROS",
+"Bandol (rouge)|Provence|R|Mourvèdre|mûre,cassis,cuir,poivre,thym|5,20|BAN",
+"Bandol (rosé)|Provence|S|Mourvèdre, Grenache|fraise,pêche,thym|1,4|ROS",
+"Languedoc (rouge)|Languedoc-Roussillon|R|Grenache, Syrah|mûre,cerise,thym,poivre|2,6|SUD",
+"Pic Saint-Loup|Languedoc-Roussillon|R|Syrah, Grenache|cerise,mûre,poivre,thym|3,8|SUD",
+"Faugères|Languedoc-Roussillon|R|Syrah, Grenache|mûre,cassis,thym,réglisse|3,9|SUD",
+"Saint-Chinian|Languedoc-Roussillon|R|Syrah, Grenache|mûre,thym,poivre,cuir|3,8|SUD",
+"Corbières|Languedoc-Roussillon|R|Carignan, Grenache|mûre,thym,poivre|2,6|SUD",
+"Minervois|Languedoc-Roussillon|R|Syrah, Grenache|mûre,cerise,thym|2,7|SUD",
+"Banyuls|Languedoc-Roussillon|L|Grenache|prune,café,cacao,fruits secs,caramel|5,30|BANY",
+"Cahors|Sud-Ouest|R|Malbec|mûre,prune,violette,réglisse,cuir|4,15|CAH",
+"Madiran|Sud-Ouest|R|Tannat|mûre,cassis,réglisse,cacao,fumé|6,20|MAD",
+"Jurançon|Sud-Ouest|L|Petit manseng|ananas,mangue,miel,fruits secs|4,20|JUR",
+"Bergerac (rouge)|Sud-Ouest|R|Merlot, Cabernet|cassis,prune,cèdre|2,7|BXS",
+"Arbois (blanc)|Jura|B|Chardonnay, Savagnin|pomme,noisette,fruits secs|3,10|JURB",
+"Arbois (rouge)|Jura|R|Poulsard, Trousseau|cerise,fraise,poivre|2,6|JURR",
+"Côtes du Jura (blanc)|Jura|B|Chardonnay, Savagnin|pomme,noisette,amande|2,8|JURB",
+"Château-Chalon|Jura|B|Savagnin|noisette,fruits secs,cannelle|8,50|VJA",
+"Apremont|Savoie|B|Jacquère|citron,acacia,pomme|1,3|SAV",
+"Roussette de Savoie|Savoie|B|Altesse|poire,acacia,amande,miel|2,6|SAV",
+"Mondeuse|Savoie|R|Mondeuse|mûre,poivre,violette|2,8|MON",
+"Patrimonio (rouge)|Corse|R|Nielluccio|cerise,thym,poivre|3,8|SUD"
+];
+const ARCH={
+ PN1:{robe:"Rouge rubis clair à grenat, transparente, avec des reflets tuilés en vieillissant.",bouche:"Attaque souple et fraîche, tanins fins et soyeux, acidité nette, corps moyen. Un vin de finesse plus que de puissance.",finale:"Moyenne à longue, sur les fruits rouges et une pointe de sous-bois.",temp:"15 à 16 °C",accords:"volaille rôtie, jambon persillé, bœuf bourguignon, fromages à pâte molle",s:[4,2,3,3,0],bo:["cerise","fraise","sous-bois"]},
+ PN2:{robe:"Rouge rubis soutenu à grenat, brillante, plus profonde que les pinots légers.",bouche:"Attaque ample, matière dense et tanins plus serrés, souvent austère dans la jeunesse. S'assouplit nettement avec la garde.",finale:"Longue, épicée, avec le cuir et le sous-bois qui se développent.",temp:"16 à 17 °C",accords:"gibier à plume, bœuf, canard, fromages affinés",s:[4,3,4,3,0],bo:["cerise","prune","cuir","sous-bois","poivre"]},
+ CH1:{robe:"Jaune pâle à reflets verts ou dorés, limpide.",bouche:"Attaque fraîche, rondeur modérée, acidité moyenne, corps moyen. Un vin facile, centré sur le fruit.",finale:"Courte à moyenne, fraîche.",temp:"9 à 11 °C",accords:"fromages de chèvre, poissons grillés, volaille à la crème, charcuterie",s:[3,0,3,3,0],bo:["pomme","citron","amande"]},
+ CH2:{robe:"Jaune pâle aux reflets verts, brillante.",bouche:"Attaque vive et tendue, grande fraîcheur, corps moyen, texture droite et minérale.",finale:"Longue et saline, sur la craie et les agrumes.",temp:"9 à 11 °C",accords:"huîtres, poissons et crustacés, escargots, fromages de chèvre",s:[5,0,3,3,0],bo:["citron","pomme","craie","iodé"]},
+ CH3:{robe:"Jaune doré, brillante, parfois des reflets paille.",bouche:"Attaque ronde et ample, texture grasse et onctueuse, acidité bien intégrée, corps plein.",finale:"Longue, beurrée et noisetée.",temp:"11 à 13 °C",accords:"volaille à la crème, homard, poisson en sauce, saint-jacques, comté",s:[3,0,4,4,0],bo:["beurre","noisette","poire","miel"]},
+ CREM:{robe:"Jaune pâle, bulles fines et régulières.",bouche:"Attaque fraîche, bulle plus souple que celle du champagne, fruité, corps léger à moyen.",finale:"Moyenne, fruitée.",temp:"6 à 8 °C",accords:"apéritif, poissons, desserts légers",s:[4,0,2,3,1],bo:["pomme","citron","brioche"]},
+ GA1:{robe:"Rouge violacé vif à rubis, brillante.",bouche:"Attaque fruitée et gouleyante, peu de tanins, acidité fraîche, corps léger à moyen.",finale:"Courte à moyenne, fruitée.",temp:"12 à 14 °C",accords:"charcuterie, andouillette, salades composées, volaille froide",s:[3,1,2,2,0],bo:["fraise","cerise","framboise"]},
+ GA2:{robe:"Rouge grenat à pourpre, plus soutenue.",bouche:"Attaque pleine, fruit mûr, tanins plus présents et structure dense. Évolue vers des notes proches du pinot noir en vieillissant.",finale:"Moyenne à longue, épicée.",temp:"13 à 15 °C",accords:"coq au vin, bœuf, volaille rôtie, fromages affinés",s:[3,2,3,3,0],bo:["cerise","prune","poivre","réglisse"]},
+ SUD:{robe:"Rouge rubis à grenat, intense.",bouche:"Attaque souple et fruitée, tanins ronds, chaleur en bouche, corps moyen à plein.",finale:"Moyenne, épicée, aux herbes de garrigue.",temp:"15 à 17 °C",accords:"grillades, plats mijotés, cuisine du Sud, fromages de brebis",s:[2,3,3,4,0],bo:["mûre","cerise","thym","poivre"]},
+ SY1:{robe:"Rouge pourpre profond, presque noire pour les plus concentrés.",bouche:"Attaque franche, matière dense, tanins serrés mais fins, fraîcheur, corps plein.",finale:"Longue, poivrée et fumée.",temp:"16 à 17 °C",accords:"gibier, agneau, daube, viandes grillées, fromages affinés",s:[3,4,4,4,0],bo:["mûre","cassis","poivre","fumé"]},
+ VIO:{robe:"Jaune doré, brillante.",bouche:"Attaque ample et grasse, très peu d'acidité, texture onctueuse, alcool présent.",finale:"Longue, florale et abricotée.",temp:"10 à 12 °C",accords:"volaille, poissons en sauce, cuisine épicée douce, fromages",s:[2,0,4,4,0],bo:["pêche","acacia","chèvrefeuille"]},
+ GR1:{robe:"Rouge grenat soutenu, dense.",bouche:"Attaque chaleureuse, fruit mûr, tanins ronds à fermes, alcool bien présent, corps plein.",finale:"Longue, épicée et chaude.",temp:"16 à 17 °C",accords:"agneau aux herbes, daube provençale, gibier, grillades",s:[2,3,4,5,0],bo:["cerise","prune","poivre","thym","réglisse"]},
+ TAV:{robe:"Rose soutenu à rouge clair, brillante.",bouche:"Attaque pleine et vineuse, charpentée pour un rosé, corps plein, notes épicées.",finale:"Longue, épicée.",temp:"10 à 12 °C",accords:"grillades, cuisine épicée, charcuterie, viandes blanches",s:[3,2,4,4,0],bo:["fraise","cerise","poivre","thym"]},
+ BXG:{robe:"Rouge profond, grenat, presque opaque dans la jeunesse.",bouche:"Attaque nette, tanins serrés et structurants, corps moyen à plein, belle fraîcheur. Demande du temps pour s'ouvrir.",finale:"Longue, sur le cassis, le cèdre et la réglisse.",temp:"16 à 18 °C",accords:"côte de bœuf, agneau, canard, fromages affinés",s:[3,5,4,3,0],bo:["cassis","cèdre","vanille","réglisse"]},
+ BXD:{robe:"Rouge grenat dense, reflets pourpres.",bouche:"Attaque ronde et veloutée, chair généreuse, tanins soyeux, corps plein.",finale:"Longue, fruitée et truffée.",temp:"16 à 18 °C",accords:"bœuf en sauce, canard, gibier, fromages affinés",s:[3,4,4,4,0],bo:["prune","mûre","cacao","truffe"]},
+ BXB:{robe:"Jaune doré, brillante.",bouche:"Attaque ample, gras équilibré par une belle tension, notes boisées fondues, corps plein.",finale:"Longue, citronnée et vanillée.",temp:"10 à 12 °C",accords:"poissons nobles, volaille à la crème, homard",s:[4,0,4,4,0],bo:["citron","pamplemousse","vanille","beurre"]},
+ BXS:{robe:"Rouge rubis à grenat.",bouche:"Attaque souple, fruité, tanins souples, corps moyen.",finale:"Moyenne, fruitée.",temp:"15 à 17 °C",accords:"viandes rouges grillées, volaille rôtie, plats du quotidien",s:[3,3,3,3,0],bo:["cassis","prune","cèdre"]},
+ SB1:{robe:"Jaune pâle à reflets verts, brillante.",bouche:"Attaque vive et nerveuse, acidité marquée, corps léger à moyen, texture tendue.",finale:"Moyenne, fraîche et citronnée.",temp:"8 à 10 °C",accords:"fromages de chèvre, poissons, fruits de mer, asperges",s:[5,0,2,3,0],bo:["pamplemousse","citron","herbe coupée","silex"]},
+ LIQ:{robe:"Jaune doré à ambré, brillante, avec des jambes marquées.",bouche:"Attaque onctueuse et sucrée, acidité qui apporte l'équilibre, très riche, corps plein.",finale:"Très longue, miel et fruits confits.",temp:"8 à 10 °C",accords:"foie gras, roquefort, desserts aux fruits, volaille à la crème",s:[3,0,5,3,5],bo:["miel","abricot sec","orange","cire"]},
+ CHN1:{robe:"Jaune doré à reflets verts.",bouche:"Attaque vive, texture ample et cireuse, acidité nerveuse, minéralité. Vérifie le niveau de sucre sur l'étiquette (sec, demi-sec, moelleux).",finale:"Longue, sur le coing et le miel.",temp:"10 à 12 °C",accords:"poissons en sauce, volaille, fromages de chèvre, cuisine asiatique douce",s:[5,0,3,3,1],bo:["coing","pomme","miel","craie"]},
+ MUS:{robe:"Jaune pâle aux reflets verts.",bouche:"Attaque vive, légère, très sèche, saline.",finale:"Courte à moyenne, iodée.",temp:"8 à 10 °C",accords:"huîtres, fruits de mer, poissons, fritures",s:[4,0,2,2,0],bo:["citron","iodé","pomme"]},
+ CF:{robe:"Rouge rubis à pourpre.",bouche:"Attaque fraîche et fruitée, tanins souples à fermes, corps moyen, notes végétales.",finale:"Moyenne, poivronnée et fruitée.",temp:"13 à 15 °C",accords:"rillettes, charcuterie, volaille, grillades, fromages de chèvre",s:[4,3,3,3,0],bo:["framboise","cassis","poivron"]},
+ RIE:{robe:"Jaune pâle à reflets verts, brillante.",bouche:"Attaque vive et tendue, grande acidité, sec, minéral, corps moyen.",finale:"Longue, citronnée et minérale.",temp:"8 à 10 °C",accords:"choucroute, poissons, fruits de mer, volaille, cuisine asiatique",s:[5,0,3,3,0],bo:["citron","pomme","silex"]},
+ GEW:{robe:"Jaune doré, brillante.",bouche:"Attaque ample et aromatique, peu d'acidité, texture grasse, alcool présent.",finale:"Longue, épicée et florale.",temp:"8 à 10 °C",accords:"munster, cuisine thaïe et épicée, foie gras, desserts aux fruits",s:[2,0,4,4,1],bo:["litchi","rose","cannelle","miel"]},
+ PGR:{robe:"Jaune doré.",bouche:"Attaque ronde et ample, corps plein, acidité douce, notes fumées.",finale:"Longue, miel et fruits secs.",temp:"10 à 12 °C",accords:"foie gras, volaille à la crème, plats en sauce, fromages",s:[3,0,4,4,1],bo:["poire","miel","fumé","fruits secs"]},
+ CHAMP:{robe:"Jaune pâle à doré, bulles fines et persistantes.",bouche:"Attaque vive, bulle crémeuse, acidité fraîche, corps moyen, dosage léger.",finale:"Longue, brioche et agrumes.",temp:"7 à 9 °C",accords:"apéritif, fruits de mer, poissons fins, fromages crémeux",s:[5,0,3,3,1],bo:["pomme","citron","brioche","amande"]},
+ ROS:{robe:"Rose pâle à saumon, brillante.",bouche:"Attaque fraîche et fruitée, très souple, corps léger, peu de tanins.",finale:"Courte à moyenne, fruitée et fraîche.",temp:"8 à 10 °C",accords:"cuisine méditerranéenne, grillades, salades, tapas",s:[3,0,2,3,0],bo:["fraise","pamplemousse","pêche"]},
+ BAN:{robe:"Rouge sombre, presque noire.",bouche:"Attaque puissante, tanins fermes, chair dense, corps plein.",finale:"Très longue, sauvage et épicée.",temp:"16 à 18 °C",accords:"gibier, daube, agneau, viandes en sauce, truffe",s:[3,5,5,4,0],bo:["mûre","cassis","cuir","poivre","thym"]},
+ BANY:{robe:"Rouge tuilé à brun.",bouche:"Attaque douce, sucrée et chaude, fruits cuits, alcool de vin fortifié.",finale:"Très longue, cacao et fruits secs.",temp:"14 à 16 °C",accords:"chocolat noir, desserts au café, fromages bleus",s:[2,2,5,5,4],bo:["prune","café","cacao","fruits secs","caramel"]},
+ CAH:{robe:"Rouge très sombre, presque noir, reflets violacés.",bouche:"Attaque puissante, tanins fermes et rustiques, chair dense, corps plein.",finale:"Longue, sur la mûre et la réglisse.",temp:"16 à 18 °C",accords:"cassoulet, confit de canard, magret, viandes grillées",s:[3,5,5,4,0],bo:["mûre","prune","réglisse"]},
+ MAD:{robe:"Rouge noir intense.",bouche:"Attaque très structurée, tanins serrés et puissants, corps plein.",finale:"Très longue, épicée et réglissée.",temp:"16 à 18 °C",accords:"confit, cassoulet, bœuf, fromages de brebis",s:[3,5,5,4,0],bo:["mûre","cassis","réglisse","cacao"]},
+ JUR:{robe:"Jaune doré.",bouche:"Attaque riche et exotique, sucrosité équilibrée par une vive acidité.",finale:"Longue, fruits exotiques et épices.",temp:"8 à 10 °C",accords:"foie gras, fromages bleus, desserts aux fruits exotiques",s:[5,0,4,3,4],bo:["ananas","mangue","miel","fruits secs"]},
+ JURB:{robe:"Jaune doré, parfois ambrée.",bouche:"Attaque vive, notes de noix et de pomme, caractère parfois légèrement oxydatif selon l'élevage, corps moyen.",finale:"Longue, noisette et fruits secs.",temp:"10 à 12 °C",accords:"comté, volaille aux morilles, poisson en sauce, fondue",s:[4,0,3,3,0],bo:["pomme","noisette","fruits secs"]},
+ JURR:{robe:"Rouge clair, tuilé.",bouche:"Attaque légère, tanins fins, fruit croquant, corps léger.",finale:"Courte à moyenne, épicée.",temp:"13 à 15 °C",accords:"charcuterie, volaille, morbier",s:[4,2,2,3,0],bo:["cerise","fraise","poivre"]},
+ VJA:{robe:"Jaune ambré, brillante.",bouche:"Attaque sèche et puissante, acidité vive, notes de noix et d'épices.",finale:"Extrêmement longue, noix et épices douces.",temp:"14 à 16 °C",accords:"comté vieux, poulet aux morilles, fromages affinés",s:[5,0,4,4,0],bo:["noisette","fruits secs","cannelle"]},
+ SAV:{robe:"Jaune pâle, reflets verts.",bouche:"Attaque fraîche, légère et vive, florale et minérale.",finale:"Courte à moyenne.",temp:"8 à 10 °C",accords:"fondue, raclette, poissons du lac, fromages de montagne",s:[4,0,2,3,0],bo:["citron","acacia","pomme"]},
+ MON:{robe:"Rouge violacé foncé.",bouche:"Attaque épicée, tanins fermes, acidité vive, corps moyen à plein.",finale:"Moyenne, poivrée.",temp:"14 à 16 °C",accords:"charcuterie, diots, tartiflette, viandes grillées",s:[4,4,3,3,0],bo:["mûre","poivre","violette"]}
+};
+const AOC=AOC_RAW.map(s=>{const p=s.split('|'),g=p[5].split(',').map(Number);return{name:p[0],region:p[1],color:p[2],cepages:p[3],aromas:p[4].split(','),g0:g[0],g1:g[1],ar:ARCH[p[6]]};});
+AOC.forEach(a=>{if(!a.ar)throw new Error('style manquant : '+a.name);});
+const aocOf=n=>{n=String(n||'').trim().toLowerCase();return n?AOC.find(a=>a.name.toLowerCase()===n):null;};
+
+/* ============ Roue des arômes ============ */
+const WHEEL=[
+['Fruits rouges',['fraise','cerise','framboise','groseille']],
+['Fruits noirs',['cassis','mûre','myrtille','prune']],
+['Agrumes',['citron','pamplemousse','orange','citron vert']],
+['Fruits blancs',['pomme','poire','pêche','coing']],
+['Fruits exotiques',['ananas','mangue','fruit de la passion','litchi']],
+['Fruits secs et miel',['miel','fruits secs','abricot sec','cire']],
+['Floral',['rose','violette','acacia','tilleul','chèvrefeuille']],
+['Végétal',['herbe coupée','buis','poivron','menthe']],
+['Épicé',['poivre','réglisse','cannelle','thym']],
+['Boisé',['vanille','cèdre','fumé','toasté']],
+['Torréfié',['café','cacao','caramel','pain grillé']],
+['Beurré et brioché',['beurre','brioche','noisette','amande']],
+['Minéral',['craie','silex','iodé','pétrole']],
+['Sous-bois et animal',['champignon','sous-bois','cuir','truffe','gibier']]
+];
+const famOf={};WHEEL.forEach(w=>w[1].forEach(d=>famOf[d]=w[0]));
+
+/* ============ Grilles de notation (toutes sur 100) ============ */
+const BEG=[
+ {id:'vis',t:'Aspect visuel',max:10,h:'Regarde la couleur et la limpidité. Un vin clair et brillant est bon signe.'},
+ {id:'odo',t:'Odeur',max:20,h:'Sens le vin, puis tourne le verre et sens à nouveau. Plus c\'est intense et agréable, plus la note monte.'},
+ {id:'bou',t:'Goût en bouche',max:40,h:'Le plus important : est-ce équilibré entre l\'acidité (qui pique un peu), la rondeur et, pour les rouges, les tanins ?'},
+ {id:'lon',t:'Longueur',max:15,h:'Après avoir avalé, combien de temps le goût reste-t-il ? Quelques secondes : court. Plus de 10 secondes : long.'},
+ {id:'pla',t:'Plaisir global',max:15,h:'Ton coup de cœur : en reprendrais-tu un verre avec plaisir ?'}
+];
+const DESC3=[['aci','Acidité','Ce qui donne de la fraîcheur, comme un citron'],['cor','Corps','Léger comme de l\'eau ou riche comme du lait'],['tan','Tanins','Ce qui assèche les gencives, comme un thé fort (rouges)']];
+const EXP=[
+ {t:'Robe',items:[['lim','Limpidité',3],['int','Intensité colorante',4],['nua','Nuance et brillance',3]]},
+ {t:'Nez',items:[['fra','Franchise',5],['nin','Intensité aromatique',5],['cpx','Complexité',10],['qua','Qualité des arômes',5]]},
+ {t:'Bouche',items:[['att','Attaque',5],['aci','Acidité',7],['tan','Tanins / matière',8],['alc','Alcool et équilibre',5],['cor','Corps et densité',5],['mil','Milieu de bouche',5]]},
+ {t:'Finale',items:[['per','Persistance (caudalies)',8],['qfi','Qualité de la finale',7]]},
+ {t:'Harmonie et potentiel',items:[['har','Harmonie d\'ensemble',8],['pot','Potentiel de garde',7]]}
+];
+function calc(mode,sc){
+  return mode==='beg'?BEG.reduce((a,c)=>a+(+sc[c.id]||0),0)
+    :EXP.reduce((a,g)=>a+g.items.reduce((b,i)=>b+(+sc[i[0]]||0),0),0);
+}
+const label=t=>t>=95?'Exceptionnel':t>=90?'Remarquable':t>=85?'Très bon':t>=80?'Bon':t>=70?'Correct':t>0?'Moyen':'—';
+
+/* ============ Logique cave ============ */
+function status(b){
+  if((+b.qty||0)<=0)return{k:'empty',t:'Épuisée'};
+  const y=new Date().getFullYear(),f=parseInt(b.from,10),t=parseInt(b.to,10);
+  if(!f&&!t)return{k:'na',t:'Fenêtre ?'};
+  if(f&&y<f)return{k:'wait',t:'À attendre'};
+  if(t&&y>t)return{k:'past',t:'Apogée passée'};
+  if(t&&y>=t-1)return{k:'soon',t:'À boire vite'};
+  return{k:'ok',t:'À boire'};
+}
+const titleOf=b=>b.name||b.appellation||b.domaine||'Sans nom';
+const subOf=b=>[b.domaine,b.name?b.appellation:''].filter(Boolean).join(' · ');
+function sorted(){
+  const r={soon:0,ok:1,wait:2,na:3,past:4,empty:5};
+  return S.bottles.slice().sort((a,b)=>(r[status(a).k]-r[status(b).k])||titleOf(a).localeCompare(titleOf(b),'fr'));
+}
+function filtered(){
+  let l=sorted();
+  if(ST.tab!=='all')l=l.filter(b=>b.color===ST.tab);
+  const q=ST.q.trim().toLowerCase();
+  if(q)l=l.filter(b=>[b.name,b.domaine,b.appellation,b.region,b.location,b.cepages,b.vintage].join(' ').toLowerCase().includes(q));
+  return l;
+}
+const lastTasting=b=>(b.tastings||[]).slice().sort((x,y)=>String(y.date).localeCompare(String(x.date)))[0];
+function typicalMatch(b,t){
+  const a=aocOf(b.appellation);if(!a)return null;
+  const sel=(t.nez||[]).concat(t.bou||[]);
+  if(t.mode==='beg'){
+    const fams=Array.from(new Set(typAll(a).map(x=>famOf[x])));
+    return{hit:fams.filter(f=>sel.indexOf(f)>-1).length,total:fams.length};
+  }
+  return{hit:typAll(a).filter(x=>sel.indexOf(x)>-1).length,total:typAll(a).length};
+}
+
+/* ============ Toast / feuilles ============ */
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200);}
+function openSheet(html){
+  const s=$('#sheet');s.innerHTML=html;s.scrollTop=0;
+  $('#backdrop').classList.add('on');requestAnimationFrame(()=>s.classList.add('on'));
+  $$('[data-close]',s).forEach(b=>b.addEventListener('click',closeSheet));
+}
+function closeSheet(){$('#sheet').classList.remove('on');$('#backdrop').classList.remove('on');}
+$('#backdrop').addEventListener('click',closeSheet);
+
+/* ============ Accueil ============ */
+function renderHome(){
+  const all=S.bottles,qty=all.reduce((a,b)=>a+(+b.qty||0),0);
+  const drink=all.filter(b=>{const k=status(b).k;return k==='ok'||k==='soon';}).reduce((a,b)=>a+(+b.qty||0),0);
+  $('#heroSub').textContent=qty?qty+' bouteille'+(qty>1?'s':'')+' · '+drink+' à boire maintenant':'Ta cave est vide pour l\'instant';
+  const feat=sorted().find(b=>status(b).k==='soon')||sorted().find(b=>status(b).k==='ok')||sorted()[0];
+  const hb=$('#heroBottle');
+  hb.innerHTML=bottleSVG(feat?feat.color:'R',feat?feat.vintage:'');
+  hb.onclick=feat?()=>openDetail(feat.id):null;
+  $('#tabs').innerHTML=TABS.map(t=>{
+    const n=t[0]==='all'?qty:all.filter(b=>b.color===t[0]).reduce((a,b)=>a+(+b.qty||0),0);
+    return '<button class="tab'+(ST.tab===t[0]?' on':'')+'" data-t="'+t[0]+'"><i>'+n+'</i>'+t[1]+'</button>';
+  }).join('');
+  renderList();
+}
+function renderList(){
+  const l=filtered(),box=$('#list');
+  if(!S.bottles.length){
+    box.innerHTML='<div class="emptybox"><b>Ta cave est vide</b>Ajoute ta première bouteille avec le bouton en bas à droite.<br><br><button class="btn ghost" id="demo" style="display:inline-block;flex:none">Voir 4 bouteilles d\'exemple</button></div>';
+    return;
+  }
+  if(!l.length){box.innerHTML='<div class="emptybox"><b>Aucun résultat</b>Essaie un autre filtre ou une autre recherche.</div>';return;}
+  box.innerHTML=l.map(b=>{
+    const s=status(b);
+    return '<article class="card'+(s.k==='empty'?' empty':'')+'" data-id="'+b.id+'"><div class="cbottle">'+bottleSVG(b.color,b.vintage)+'</div>'
+    +'<div class="cinfo"><h3>'+esc(titleOf(b))+'</h3><p>'+esc(subOf(b)||b.region||'')+'</p>'
+    +'<div class="chips"><span class="chip">'+esc(b.vintage||'NV')+'</span><span class="chip st-'+s.k+'">'+s.t+'</span></div></div>'
+    +'<div class="qcol"><b>'+(+b.qty||0)+'</b><small>bouteille'+((+b.qty||0)>1?'s':'')+'</small><button class="plus" data-plus="'+b.id+'" aria-label="Ajouter une bouteille">'+IC.plus+'</button></div></article>';
+  }).join('');
+}
+$('#btnSearch').innerHTML=IC.search;$('#btnStats').innerHTML=IC.chart;$('#btnAoc').innerHTML=IC.book;
+$('#fab').innerHTML=IC.plus+'Ajouter';
+$('#btnSearch').addEventListener('click',()=>{const q=$('#q');q.hidden=!q.hidden;if(!q.hidden)q.focus();else{q.value='';ST.q='';renderList();}});
+$('#q').addEventListener('input',e=>{ST.q=e.target.value;renderList();});
+$('#btnStats').addEventListener('click',openStats);
+$('#btnAoc').addEventListener('click',()=>openAocList());
+$('#fab').addEventListener('click',()=>openForm());
+$('#tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;ST.tab=t.dataset.t;renderHome();});
+$('#list').addEventListener('click',e=>{
+  if(e.target.closest('#demo')){loadDemo();return;}
+  const p=e.target.closest('[data-plus]');
+  if(p){const b=get(p.dataset.plus);if(b){b.qty=(+b.qty||0)+1;save();renderHome();toast('+1 · '+titleOf(b)+' ×'+b.qty);}return;}
+  const c=e.target.closest('.card');if(c)openDetail(c.dataset.id);
+});
+
+/* ============ Fiche détail ============ */
+function openDetail(id){ST.open=id;$('#detail').hidden=false;document.body.style.overflow='hidden';renderDetail();}
+function closeDetail(){ST.open=null;$('#detail').hidden=true;document.body.style.overflow='';renderHome();}
+function renderDetail(){
+  const b=get(ST.open);if(!b){closeDetail();return;}
+  const d=$('#detail'),keepTop=d.scrollTop;
+  const s=status(b),a=aocOf(b.appellation),lt=lastTasting(b);
+  const desc=a?'Cépages : '+a.cepages+'. Le profil détaillé (œil, nez, bouche, finale) est juste en dessous.':(b.cepages?'Cépages : '+b.cepages+'.':(b.notes||'Choisis une appellation connue pour voir son profil typique.'));
+  const list=sorted();
+  let win='';
+  const f=parseInt(b.from,10),t=parseInt(b.to,10),y=new Date().getFullYear();
+  if(f&&t&&t>=f){
+    const lo=f-2,hi=t+2,span=hi-lo,pct=v=>Math.max(0,Math.min(100,(v-lo)/span*100));
+    win='<h4>Fenêtre de dégustation</h4><div class="win"><div class="seg" style="left:'+pct(f)+'%;width:'+(pct(t)-pct(f))+'%"></div><div class="now" style="left:'+pct(y)+'%"></div></div><div class="winl"><span>dès '+f+'</span><span>'+s.t+' · '+y+'</span><span>jusqu\'à '+t+'</span></div>';
+  }
+  const tast=(b.tastings||[]).slice().sort((x,z)=>String(z.date).localeCompare(String(x.date)));
+  d.innerHTML=
+   '<div class="dtop"><button class="back" id="dBack">'+IC.back+'Ma cave</button><div class="ic-row"><button class="circle filled" id="dEdit" aria-label="Modifier">'+IC.edit+'</button><button class="circle filled" id="dDel" aria-label="Supprimer">'+IC.trash+'</button></div></div>'
+  +'<div class="dgrid"><nav class="strip" id="strip">'+list.map(x=>'<button class="sitem'+(x.id===b.id?' on':'')+'" data-id="'+x.id+'" aria-label="'+esc(titleOf(x))+'">'+bottleSVG(x.color,x.vintage)+'</button>').join('')+'</nav>'
+  +'<div class="dmain"><div class="dbottle">'+bottleSVG(b.color,b.vintage)+'</div>'
+  +'<h2>'+esc(titleOf(b))+'</h2><div class="dsub">'+esc(subOf(b)||'')+'</div>'
+  +'<div class="chips"><span class="chip">'+esc(b.vintage||'NV')+'</span><span class="chip">'+CNAME[b.color]+'</span><span class="chip st-'+s.k+'">'+s.t+'</span></div>'
+  +'<div class="qrow"><span>En cave</span><div class="stepper"><button id="qMinus" aria-label="Retirer une bouteille">−</button><b>'+(+b.qty||0)+'</b><button id="qPlus" aria-label="Ajouter une bouteille">+</button></div></div>'
+  +'<p class="desc">'+esc(desc)+'</p>'
+  +(lt?'<div class="score"><b>'+lt.total+'</b><span>/100 · '+label(lt.total)+'</span></div>':'<div class="score"><span>Pas encore dégustée</span></div>')
+  +'</div></div>'
+  +'<div class="dpanel">'+win+(a?profileHTML(a):'<h4>Profil de l\'appellation</h4><p class="note">Choisis une appellation connue avec le bouton Modifier pour afficher son profil détaillé.</p>')
+  +'<h4>Ma bouteille</h4><div class="kv"><div><small>Valeur en cave</small><b>'+(b.price?eur((+b.qty||0)*b.price):'—')+'</b></div><div><small>Prix d\'achat</small><b>'+(b.price?eur(b.price):'—')+'</b></div><div><small>Région</small><b>'+esc(b.region||'—')+'</b></div><div><small>Emplacement</small><b>'+esc(b.location||'—')+'</b></div></div>'
+  +(b.notes?'<h4>Notes</h4><p class="note" style="font-size:14px;color:var(--ink)">'+esc(b.notes)+'</p>':'')
+  +'<h4>Mes dégustations ('+tast.length+')</h4>'
+  +(tast.length?tast.map(x=>{
+      const m=typicalMatch(b,x),sel=(x.nez||[]).concat(x.bou||[]);
+      return '<div class="tcard"><div class="thead"><div><div class="tscore">'+x.total+'<small> /100</small></div><div class="tmeta">'+label(x.total)+' · '+esc(x.date)+' · '+(x.mode==='exp'?'Expert':'Débutant')+'</div></div></div>'
+      +(sel.length?'<div class="chips">'+sel.map(z=>'<span class="chip'+(a&&(typAll(a).indexOf(z)>-1||typAll(a).some(q=>famOf[q]===z))?' hit':'')+'">'+esc(z)+'</span>').join('')+'</div>':'')
+      +(m?'<p class="tmeta">Profil typique retrouvé : '+m.hit+'/'+m.total+'</p>':'')
+      +(x.notes?'<p>'+esc(x.notes)+'</p>':'')
+      +'<button class="tdel" data-tdel="'+x.id+'">Supprimer cette dégustation</button></div>';
+    }).join(''):'<p class="note">Aucune dégustation enregistrée. Appuie sur « Déguster » pour noter cette bouteille sur 100.</p>')
+  +'</div>'
+  +'<div class="dbar"><button class="btn" id="dTaste">Déguster</button></div>';
+  d.scrollTop=keepTop;
+  const on=$('.sitem.on',d);if(on&&on.scrollIntoView)on.scrollIntoView({block:'nearest'});
+}
+$('#detail').addEventListener('click',e=>{
+  const b=get(ST.open);if(!b)return;
+  if(e.target.closest('#dBack'))return closeDetail();
+  if(e.target.closest('#dEdit'))return openForm(b.id);
+  if(e.target.closest('#dDel')){if(confirm('Supprimer « '+titleOf(b)+' » et ses dégustations ?')){S.bottles=S.bottles.filter(x=>x.id!==b.id);save();closeDetail();toast('Bouteille supprimée');}return;}
+  if(e.target.closest('#dTaste'))return openTasting(b.id);
+  if(e.target.closest('#qMinus')){b.qty=Math.max(0,(+b.qty||0)-1);save();return renderDetail();}
+  if(e.target.closest('#qPlus')){b.qty=(+b.qty||0)+1;save();return renderDetail();}
+  const si=e.target.closest('.sitem');if(si&&si.dataset.id!==b.id){ST.open=si.dataset.id;$('#detail').scrollTop=0;return renderDetail();}
+  const td=e.target.closest('[data-tdel]');
+  if(td&&confirm('Supprimer cette dégustation ?')){b.tastings=(b.tastings||[]).filter(x=>x.id!==td.dataset.tdel);save();renderDetail();}
+});
+
+/* ============ Formulaire bouteille ============ */
+function openForm(id,preApp){
+  const b=id?get(id):null,v=b||{qty:1,color:'R',appellation:preApp||''};
+  const doms=Array.from(new Set(S.bottles.map(x=>x.domaine).filter(Boolean))).sort();
+  const regs=Array.from(new Set(AOC.map(a=>a.region).concat(S.bottles.map(x=>x.region).filter(Boolean)))).sort();
+  openSheet('<h3 class="sh">'+(b?'Modifier la bouteille':'Ajouter une bouteille')+'</h3><div class="form">'
+  +'<label>Domaine<input id="f-dom" list="dl-dom" value="'+esc(v.domaine)+'" placeholder="Nom du domaine" autocomplete="off"></label>'
+  +'<label>Cuvée ou nom <small>(facultatif)</small><input id="f-name" value="'+esc(v.name)+'" autocomplete="off"></label>'
+  +'<label>Appellation<input id="f-app" list="dl-app" value="'+esc(v.appellation)+'" placeholder="Commence à taper : Chablis, Pomerol…" autocomplete="off"></label>'
+  +'<div class="typ" id="f-typ" hidden></div>'
+  +'<div class="row2"><label>Millésime<input id="f-vin" inputmode="numeric" maxlength="4" value="'+esc(v.vintage)+'" placeholder="2019 (vide = NV)"></label>'
+  +'<label>Couleur<select id="f-col">'+Object.keys(CNAME).map(k=>'<option value="'+k+'"'+(v.color===k?' selected':'')+'>'+CNAME[k]+'</option>').join('')+'</select></label></div>'
+  +'<div class="row2"><label>Région<input id="f-reg" list="dl-reg" value="'+esc(v.region)+'"></label><label>Cépages<input id="f-cep" value="'+esc(v.cepages)+'"></label></div>'
+  +'<div class="row3"><label>Quantité<input id="f-qty" type="number" inputmode="numeric" min="0" value="'+(v.qty==null?1:v.qty)+'"></label><label>Prix (€)<input id="f-prix" inputmode="decimal" value="'+(v.price||'')+'"></label><label>Emplacement<input id="f-loc" value="'+esc(v.location)+'" placeholder="Casier A2"></label></div>'
+  +'<div class="row2"><label>À boire dès<input id="f-from" inputmode="numeric" maxlength="4" value="'+esc(v.from)+'"></label><label>Jusqu\'à<input id="f-to" inputmode="numeric" maxlength="4" value="'+esc(v.to)+'"></label></div>'
+  +'<label>Notes<textarea id="f-notes" rows="3">'+esc(v.notes)+'</textarea></label></div>'
+  +'<datalist id="dl-dom">'+doms.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist>'
+  +'<datalist id="dl-app">'+AOC.map(a=>'<option value="'+esc(a.name)+'">').join('')+'</datalist>'
+  +'<datalist id="dl-reg">'+regs.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist>'
+  +'<div class="sbar"><button class="btn ghost" data-close>Annuler</button><button class="btn" id="f-save">Enregistrer</button></div>');
+  const auto={col:!b,reg:!b,cep:!b,from:!b,to:!b};
+  const el={col:$('#f-col'),reg:$('#f-reg'),cep:$('#f-cep'),from:$('#f-from'),to:$('#f-to')};
+  Object.keys(el).forEach(k=>el[k].addEventListener('input',()=>{auto[k]=false;}));
+  const put=(k,val)=>{if(auto[k]||!el[k].value){el[k].value=val;auto[k]=true;}};
+  function refresh(){
+    const a=aocOf($('#f-app').value),box=$('#f-typ');
+    if(!a){box.hidden=true;return;}
+    put('col',a.color);put('reg',a.region);put('cep',a.cepages);
+    const vin=parseInt($('#f-vin').value,10);
+    if(vin>1900){put('from',String(vin+a.g0));put('to',String(vin+a.g1));}
+    box.hidden=false;
+    box.innerHTML='<b>Profil typique</b><div class="chips">'+a.aromas.map(x=>'<span class="chip">'+esc(x)+'</span>').join('')+'</div>Cépages : '+esc(a.cepages)+' · garde habituelle : '+a.g0+' à '+a.g1+' ans après le millésime (fenêtre proposée, à ajuster).';
+  }
+  $('#f-app').addEventListener('input',refresh);$('#f-app').addEventListener('change',refresh);$('#f-vin').addEventListener('input',refresh);
+  refresh();
+  $('#f-save').addEventListener('click',()=>{
+    const g=i=>$('#'+i).value.trim();
+    const o={id:b?b.id:uid(),domaine:g('f-dom'),name:g('f-name'),appellation:g('f-app'),vintage:g('f-vin').replace(/\D/g,'').slice(0,4),color:g('f-col'),
+      region:g('f-reg'),cepages:g('f-cep'),qty:Math.max(0,parseInt(g('f-qty'),10)||0),price:parseFloat(g('f-prix').replace(',','.'))||0,
+      location:g('f-loc'),from:g('f-from').replace(/\D/g,'').slice(0,4),to:g('f-to').replace(/\D/g,'').slice(0,4),notes:g('f-notes'),tastings:b?(b.tastings||[]):[]};
+    if(!o.domaine&&!o.name&&!o.appellation){toast('Indique au moins un domaine ou une appellation');return;}
+    if(b)S.bottles[S.bottles.indexOf(b)]=o;else S.bottles.push(o);
+    save();closeSheet();renderHome();if(ST.open)renderDetail();
+    toast(b?'Bouteille modifiée':'Bouteille ajoutée');
+  });
+}
+
+/* ============ Dégustation ============ */
+let T=null;
+function slider(k,max,val){return '<input type="range" min="0" max="'+max+'" step="1" value="'+val+'" data-k="'+k+'" data-max="'+max+'" style="--p:'+(val/max*100)+'%">';}
+function openTasting(id){
+  const b=get(id);if(!b)return;
+  T={id:id,mode:'beg',date:new Date().toISOString().slice(0,10),sc:{beg:{},exp:{}},desc:{aci:2,cor:2,tan:2},nez:[],bou:[],open:{nez:null,bou:null},notes:'',drink:(+b.qty||0)>0};
+  openSheet('<h3 class="sh">Déguster</h3><div class="note" style="margin-top:-8px">'+esc(titleOf(b))+' · '+esc(b.vintage||'NV')+'</div>'
+  +'<div class="seg2" id="tmode"><button data-m="beg" class="on">Débutant</button><button data-m="exp">Expert</button></div>'
+  +'<label class="lab">Date<input type="date" id="t-date" value="'+T.date+'" style="display:block;width:100%;margin-top:5px;border:0;background:var(--rose2);border-radius:14px;padding:12px 14px"></label>'
+  +'<div id="tbody"></div>'
+  +'<div class="grp"><div class="gh"><b>Mes notes</b></div><textarea id="t-notes" rows="3" placeholder="Occasion, accord mets-vins, ressenti…" style="width:100%;margin-top:8px;border:0;background:var(--rose2);border-radius:14px;padding:12px 14px"></textarea></div>'
+  +((+b.qty||0)>0?'<label class="chk"><input type="checkbox" id="t-drink" checked>Retirer 1 bouteille de la cave</label>':'')
+  +'<div class="sbar"><div class="tot"><b id="tTot">0</b><span id="tLab">/100</span></div><button class="btn" id="t-save" style="flex:none">Enregistrer</button></div>');
+  renderTBody();
+  $('#tmode').addEventListener('click',e=>{const m=e.target.closest('button');if(!m)return;T.mode=m.dataset.m;$$('#tmode button').forEach(x=>x.classList.toggle('on',x===m));T.open={nez:null,bou:null};renderTBody();});
+  $('#tbody').addEventListener('input',e=>{
+    const r=e.target;if(r.type!=='range')return;
+    const k=r.dataset.k;r.style.setProperty('--p',(r.value/r.dataset.max*100)+'%');
+    if(k.indexOf('d_')===0){T.desc[k.slice(2)]=+r.value;const o=r.parentNode.querySelector('output');if(o)o.textContent=r.value+'/5';return;}
+    T.sc[T.mode][k]=+r.value;
+    const o=r.parentNode.querySelector('output');if(o)o.textContent=r.value+'/'+r.dataset.max;
+    updTot();
+  });
+  $('#tbody').addEventListener('click',e=>{
+    const f=e.target.closest('.fam'),d=e.target.closest('.det');
+    if(f){
+      const w=f.dataset.w,fam=f.dataset.f;
+      if(T.mode==='beg'){const i=T[w].indexOf(fam);if(i>-1)T[w].splice(i,1);else T[w].push(fam);}
+      else T.open[w]=(T.open[w]===fam?null:fam);
+      renderAro(w);return;
+    }
+    if(d){const w=d.dataset.w,x=d.dataset.d,i=T[w].indexOf(x);if(i>-1)T[w].splice(i,1);else T[w].push(x);renderAro(w);}
+  });
+  $('#t-save').addEventListener('click',()=>{
+    const b=get(T.id);if(!b)return;
+    const total=calc(T.mode,T.sc[T.mode]);
+    if(total<=0){toast('Déplace au moins un curseur pour noter');return;}
+    const t={id:uid(),date:$('#t-date').value||T.date,mode:T.mode,scores:Object.assign({},T.sc[T.mode]),total:total,
+      desc:T.mode==='beg'?Object.assign({},T.desc):null,nez:T.nez.slice(),bou:T.bou.slice(),notes:$('#t-notes').value.trim()};
+    b.tastings=(b.tastings||[]).concat(t);
+    const dr=$('#t-drink');if(dr&&dr.checked)b.qty=Math.max(0,(+b.qty||0)-1);
+    save();closeSheet();renderHome();renderDetail();toast('Dégustation enregistrée : '+total+'/100');
+  });
+}
+function renderTBody(){
+  const m=T.mode,sc=T.sc[m];let h='';
+  if(m==='beg'){
+    h=BEG.map(c=>'<div class="grp"><div class="gh"><b>'+c.t+'</b><output style="font-weight:800;color:var(--wine2)">'+(sc[c.id]||0)+'/'+c.max+'</output></div><p class="hint">'+c.h+'</p>'+slider(c.id,c.max,sc[c.id]||0)
+      +(c.id==='bou'?'<div class="desc3"><p class="hint"><b>Pour décrire (non noté)</b></p>'+DESC3.map(x=>'<div class="srow"><label>'+x[1]+' <output>'+T.desc[x[0]]+'/5</output></label><p class="hint" style="margin:0">'+x[2]+'</p>'+slider('d_'+x[0],5,T.desc[x[0]])+'</div>').join('')+'</div>':'')+'</div>').join('');
+  }else{
+    h=EXP.map(g=>'<div class="grp"><div class="gh"><b>'+g.t+'</b><span style="font-weight:800;color:var(--wine2)">'+g.items.reduce((a,i)=>a+i[2],0)+' pts</span></div>'
+      +g.items.map(i=>'<div class="srow"><label>'+i[1]+' <output>'+(sc[i[0]]||0)+'/'+i[2]+'</output></label>'+slider(i[0],i[2],sc[i[0]]||0)+'</div>').join('')+'</div>').join('');
+  }
+  h+='<div class="grp"><div class="gh"><b>Arômes au nez</b></div><p class="hint">'+(m==='beg'?'Touche les familles que tu reconnais.':'Touche une famille, puis précise les arômes.')+(aocOf((get(T.id)||{}).appellation)?' <span class="tdot"></span> = arôme typique de l\'appellation.':'')+'</p><div class="aro" id="aro-nez"></div></div>'
+    +'<div class="grp"><div class="gh"><b>Arômes en bouche</b></div><p class="hint">Ce que tu retrouves au goût, y compris au retour en bouche.</p><div class="aro" id="aro-bou"></div></div>';
+  $('#tbody').innerHTML=h;renderAro('nez');renderAro('bou');updTot();
+}
+function renderAro(w){
+  const sel=T[w],m=T.mode;let h='';
+  const ta=aocOf((get(T.id)||{}).appellation),tl=ta?(w==='nez'?ta.aromas:ta.ar.bo):[],tf=tl.map(x=>famOf[x]);
+  WHEEL.forEach(x=>{
+    const on=m==='beg'?sel.indexOf(x[0])>-1:x[1].some(d=>sel.indexOf(d)>-1)||T.open[w]===x[0];
+    h+='<button type="button" class="fam'+(on?' on':'')+((m==='beg'?tf.indexOf(x[0])>-1:x[1].some(d=>tl.indexOf(d)>-1))?' ty':'')+'" data-w="'+w+'" data-f="'+esc(x[0])+'">'+esc(x[0])+'</button>';
+    if(m==='exp'&&T.open[w]===x[0])h+='<div class="dets">'+x[1].map(d=>'<button type="button" class="det'+(sel.indexOf(d)>-1?' on':'')+(tl.indexOf(d)>-1?' ty':'')+'" data-w="'+w+'" data-d="'+esc(d)+'">'+esc(d)+'</button>').join('')+'</div>';
+  });
+  $('#aro-'+w).innerHTML=h;
+}
+function updTot(){const t=calc(T.mode,T.sc[T.mode]);$('#tTot').textContent=t;$('#tLab').textContent='/100 · '+label(t);}
+
+/* ============ Statistiques & sauvegarde ============ */
+function bars(map){
+  const e=Object.keys(map).map(k=>[k,map[k]]).sort((a,b)=>b[1]-a[1]),mx=e.length?e[0][1]:1;
+  return e.length?e.map(x=>'<div class="bar"><span>'+esc(x[0])+'</span><span class="tr"><i style="width:'+(x[1]/mx*100)+'%"></i></span><span>'+x[1]+'</span></div>').join(''):'<p class="note">Rien à afficher.</p>';
+}
+function openStats(){
+  const B=S.bottles,q=b=>+b.qty||0,qty=B.reduce((a,b)=>a+q(b),0);
+  const val=B.reduce((a,b)=>a+q(b)*(+b.price||0),0);
+  const drink=B.filter(b=>{const k=status(b).k;return k==='ok'||k==='soon';}).reduce((a,b)=>a+q(b),0);
+  const reg={},col={};B.forEach(b=>{const r=b.region||'Autre';reg[r]=(reg[r]||0)+q(b);col[CNAME[b.color]]=(col[CNAME[b.color]]||0)+q(b);});
+  const top=B.map(b=>({b:b,t:lastTasting(b)})).filter(x=>x.t).sort((a,b)=>b.t.total-a.t.total).slice(0,3);
+  openSheet('<h3 class="sh">Ma cave en chiffres</h3>'
+  +'<div class="stat4"><div><small>Bouteilles</small><b>'+qty+'</b></div><div><small>Références</small><b>'+B.length+'</b></div><div><small>Valeur estimée</small><b>'+eur(val)+'</b></div><div><small>À boire maintenant</small><b>'+drink+'</b></div></div>'
+  +'<div class="grp"><div class="gh"><b>Par couleur</b></div>'+bars(col)+'</div>'
+  +'<div class="grp"><div class="gh"><b>Par région</b></div>'+bars(reg)+'</div>'
+  +(top.length?'<div class="grp"><div class="gh"><b>Mes mieux notées</b></div>'+top.map(x=>'<div class="bar"><span style="width:auto;flex:1">'+esc(titleOf(x.b))+'</span><span style="width:auto">'+x.t.total+'/100</span></div>').join('')+'</div>':'')
+  +'<div class="grp"><div class="gh"><b>Sauvegarde</b></div><p class="note">Tes données restent sur ton iPhone. iOS peut parfois vider le stockage d\'un site : exporte ta cave de temps en temps et garde le fichier dans Fichiers.</p>'
+  +'<div style="display:flex;gap:10px"><button class="btn" id="sExp">Exporter</button><button class="btn ghost" id="sImp">Importer</button></div><input type="file" id="sFile" accept="application/json,.json" hidden></div>'
+  +'<div class="sbar"><button class="btn ghost" data-close>Fermer</button></div>');
+  $('#sExp').addEventListener('click',exportData);
+  $('#sImp').addEventListener('click',()=>$('#sFile').click());
+  $('#sFile').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const p=JSON.parse(r.result);if(!p||!Array.isArray(p.bottles))throw 0;
+        if(confirm('Remplacer la cave actuelle par la sauvegarde ('+p.bottles.length+' références) ?')){S=p;save();closeSheet();renderHome();toast('Sauvegarde importée');}
+      }catch(err){toast('Fichier non reconnu');}
+    };
+    r.readAsText(f);
+  });
+}
+async function exportData(){
+  const blob=new Blob([JSON.stringify({v:1,date:new Date().toISOString(),bottles:S.bottles},null,1)],{type:'application/json'});
+  try{
+    const file=new File([blob],'cave-sauvegarde.json',{type:'application/json'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Sauvegarde de ma cave'});return;}
+  }catch(e){if(e&&e.name==='AbortError')return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cave-sauvegarde.json';document.body.appendChild(a);a.click();a.remove();
+}
+
+/* ============ Profil détaillé & base d'appellations ============ */
+function typAll(a){return Array.from(new Set(a.aromas.concat(a.ar.bo)));}
+const LV=[['Arômes primaires (le raisin)',['Fruits rouges','Fruits noirs','Agrumes','Fruits blancs','Fruits exotiques','Floral','Végétal','Minéral','Épicé']],
+  ['Arômes secondaires (fermentation, élevage)',['Beurré et brioché','Boisé']],
+  ['Arômes tertiaires (vieillissement)',['Torréfié','Sous-bois et animal','Fruits secs et miel']]];
+const chipsH=l=>'<div class="chips">'+l.map(x=>'<span class="chip">'+esc(x)+'</span>').join('')+'</div>';
+function structBars(sv){
+  return [['Acidité',sv[0]],['Tanins',sv[1]],['Corps',sv[2]],['Alcool',sv[3]],['Sucrosité',sv[4]]].filter(r=>r[1]>0)
+    .map(r=>'<div class="bar"><span>'+r[0]+'</span><span class="tr"><i style="width:'+(r[1]/5*100)+'%"></i></span><span>'+r[1]+'/5</span></div>').join('');
+}
+function profileHTML(a){
+  const r=a.ar;
+  const lv=LV.map(l=>{const ar=a.aromas.filter(x=>l[1].indexOf(famOf[x])>-1);return ar.length?'<div class="lvl"><small>'+l[0]+'</small>'+chipsH(ar)+'</div>':'';}).join('');
+  return '<h4>Profil typique</h4><div class="prof">'
+   +'<div class="pb"><b>Œil</b><p>'+esc(r.robe)+'</p></div>'
+   +'<div class="pb"><b>Nez</b>'+lv+'</div>'
+   +'<div class="pb"><b>Bouche</b><p>'+esc(r.bouche)+'</p>'+chipsH(r.bo)+'<div style="margin-top:10px">'+structBars(r.s)+'</div></div>'
+   +'<div class="pb"><b>Finale</b><p>'+esc(r.finale)+'</p></div>'
+   +'<div class="pb"><b>Service, accords et garde</b><div class="kv"><div><small>Température de service</small><b>'+esc(r.temp)+'</b></div><div><small>Garde habituelle</small><b>'+a.g0+' à '+a.g1+' ans</b></div></div><p style="margin:10px 0 0"><span style="color:var(--wine2);font-weight:700">Accords : </span>'+esc(r.accords)+'.</p></div>'
+   +'<p class="note">Profil indicatif du style classique de l\'appellation : il varie selon le domaine et le millésime. Compare-le avec ta propre dégustation.</p></div>';
+}
+const AQ={q:'',col:'all',reg:'all'};
+function renderAocItems(){
+  const q=AQ.q.trim().toLowerCase();
+  const l=AOC.filter(a=>(AQ.col==='all'||a.color===AQ.col)&&(AQ.reg==='all'||a.region===AQ.reg)&&(!q||(a.name+' '+a.region+' '+a.cepages+' '+a.aromas.join(' ')).toLowerCase().includes(q)));
+  $('#aql').innerHTML=l.length?l.map(a=>'<button class="aitem" data-n="'+esc(a.name)+'"><span class="adot" style="background:'+BC[a.color][1]+'"></span><span class="at"><b>'+esc(a.name)+'</b><small>'+esc(a.region)+' · '+esc(a.cepages)+'</small></span><span class="chip">'+CNAME[a.color]+'</span></button>').join(''):'<p class="note">Aucune appellation trouvée.</p>';
+}
+function openAocList(){
+  const regs=Array.from(new Set(AOC.map(a=>a.region))).sort((x,y)=>x.localeCompare(y,'fr'));
+  openSheet('<h3 class="sh">Appellations françaises</h3><p class="note" style="margin-top:-8px">'+AOC.length+' appellations avec leur profil typique : œil, nez, bouche, finale, accords.</p>'
+   +'<div class="form"><input id="aq" type="search" placeholder="Chercher : Chablis, Pinot noir, Rhône, cerise…" value="'+esc(AQ.q)+'" style="margin-bottom:10px">'
+   +'<select id="aqr" style="margin-bottom:12px"><option value="all">Toutes les régions</option>'+regs.map(r=>'<option value="'+esc(r)+'"'+(AQ.reg===r?' selected':'')+'>'+esc(r)+'</option>').join('')+'</select></div>'
+   +'<div class="tabs2" id="aqc">'+TABS.map(t=>'<button data-c="'+t[0]+'" class="'+(AQ.col===t[0]?'on':'')+'">'+t[1]+'</button>').join('')+'</div>'
+   +'<div id="aql"></div><div class="sbar"><button class="btn ghost" data-close>Fermer</button></div>');
+  $('#aq').addEventListener('input',e=>{AQ.q=e.target.value;renderAocItems();});
+  $('#aqr').addEventListener('change',e=>{AQ.reg=e.target.value;renderAocItems();});
+  $('#aqc').addEventListener('click',e=>{const c=e.target.closest('button');if(!c)return;AQ.col=c.dataset.c;$$('#aqc button').forEach(x=>x.classList.toggle('on',x===c));renderAocItems();});
+  $('#aql').addEventListener('click',e=>{const i=e.target.closest('.aitem');if(i)openAocDetail(i.dataset.n);});
+  renderAocItems();
+}
+function openAocDetail(name){
+  const a=aocOf(name);if(!a)return;
+  openSheet('<h3 class="sh">'+esc(a.name)+'</h3><div class="note" style="margin-top:-8px">'+esc(a.region)+' · '+CNAME[a.color]+' · '+esc(a.cepages)+'</div>'
+   +profileHTML(a)
+   +'<div class="sbar"><button class="btn ghost" id="aBack">Retour</button><button class="btn" id="aAdd">Ajouter à ma cave</button></div>');
+  $('#aBack').addEventListener('click',()=>openAocList());
+  $('#aAdd').addEventListener('click',()=>openForm(null,a.name));
+}
+
+/* ============ Exemples ============ */
+function loadDemo(){
+  const mk=(dom,app,vin,qty,price,loc)=>{
+    const a=aocOf(app);
+    return{id:uid(),domaine:dom,name:'',appellation:app,vintage:String(vin),color:a.color,region:a.region,cepages:a.cepages,qty:qty,price:price,location:loc,
+      from:String(vin+a.g0),to:String(vin+a.g1),notes:'Exemple à supprimer',tastings:[]};
+  };
+  S.bottles=[mk('Domaine Exemple','Pouilly-Fuissé',2021,3,24,'Casier A1'),mk('Domaine Exemple','Gevrey-Chambertin',2019,2,48,'Casier B2'),
+    mk('Domaine Exemple','Côtes de Provence (rosé)',2025,6,11,'Casier C1'),mk('Domaine Exemple','Chinon (rouge)',2020,4,13,'Casier B1')];
+  save();renderHome();toast('4 exemples ajoutés (supprimables)');
+}
+
+renderHome();
+})();
+</script>
+</body>
+</html>
