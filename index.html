@@ -270,14 +270,22 @@ details.est{margin-top:14px}details.est summary{cursor:pointer;font-weight:700;c
 @media (prefers-reduced-motion:reduce){.dxt.r5{animation:none}}
 .dxt .rr{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:999px;background:var(--rc);color:#fff;font-size:10.5px;letter-spacing:0;white-space:nowrap}
 .dxt .rr b{color:inherit}
-.dxt .nb,.dxhero .nbig{position:absolute;display:grid;place-items:center;border-radius:50%;background:#fffaf2;border:2px solid var(--wine2);color:var(--wine2);font-weight:800;box-shadow:0 1px 3px rgba(60,20,30,.2)}
-.dxt .nb{right:10px;top:112px;width:30px;height:30px;font-size:12px}
-.dxhero .nbig{right:16px;bottom:14px;width:50px;height:50px;font-size:18px;border-width:3px}
+.nb,.nbig{position:absolute;display:inline-flex;align-items:baseline;gap:1px;border-radius:999px;background:linear-gradient(135deg,#8a2444,#5e1229);color:#fff4e6;font-weight:800;box-shadow:0 2px 6px rgba(94,18,41,.35)}
+.nb b,.nbig b{font-weight:800}.nb i,.nbig i{font-style:normal;font-weight:700;opacity:.7}
+.dxt .nb{right:10px;top:7px;padding:3px 9px;font-size:12.5px}.dxt .nb i{font-size:8.5px}
+.nb.no,.nbig.no{background:#fff;color:var(--wine2);border:1.5px dashed #c99aa5;box-shadow:none;font-size:10.5px;padding:2px 8px}
+.dxhero .nbig{right:16px;top:16px;flex-direction:column;align-items:center;gap:0;padding:7px 16px 8px;border-radius:20px;font-size:26px;line-height:1}
+.dxhero .nbig small{font-size:9px;letter-spacing:.14em;font-weight:800;opacity:.75;margin-bottom:3px}.dxhero .nbig i{font-size:11px}
+.dxhero .nbig.no{font-size:12px;padding:6px 12px;border-radius:16px}
 .dxoth{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 0;border-bottom:1px solid #f0dfe1;color:var(--wine)}
 .dxoth:last-child{border-bottom:0}.dxoth small{display:block;color:var(--muted);font-size:12px;margin-top:1px}.dxoth em{font-style:normal;font-weight:800;color:var(--wine2);white-space:nowrap}
+.dxlink{display:block;margin:6px 0 14px;padding:4px 0;color:var(--wine2);font-weight:800;font-size:13.5px;text-decoration:underline;text-underline-offset:3px}
+.rarow{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center;margin:0 0 16px}
+.rtx h4{margin:0 0 2px;font-size:18px}.rtx .rsc{display:inline-block;font-size:12px;font-weight:800;color:var(--wine2);background:var(--rose);border-radius:999px;padding:2px 9px;margin-bottom:6px}
+.rtx p{margin:0;font-size:13px;line-height:1.4;color:var(--muted)}
 .dxt small.dm{margin-top:1px;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
 .dxt .mn{display:block;margin-top:3px;font-size:11px;font-weight:700;color:var(--muted)}
-.dxt .demo{position:absolute;right:10px;top:7px;font-size:9.5px;font-weight:800;letter-spacing:.06em;background:var(--gold);color:var(--wine);border-radius:8px;padding:2px 7px}
+.dxt .demo{position:absolute;left:10px;top:112px;font-size:9.5px;font-weight:800;letter-spacing:.06em;background:var(--gold);color:var(--wine);border-radius:8px;padding:2px 7px}
 .dxreg{margin:18px 0 0;font-size:15px;color:var(--wine)}
 .dxreg small{color:var(--muted);font-weight:700;margin-left:6px}
 .dxhero{position:relative;display:grid;place-items:center;padding:20px 0 12px;margin:0 -8px 8px;border-radius:30px;background:radial-gradient(circle at 50% 45%,#fff 0,var(--rose2) 55%,var(--rose) 100%)}
@@ -1429,6 +1437,27 @@ function dexBottle(e,locked){
   const maxc=Math.floor((sh.w-4)/2.35),f=sh.w<30?3.9:4.4,lines=wrapPun(e.pun||'',maxc,4);
   let txt='';lines.forEach((l,i)=>{txt+='<text x="30" y="'+(119+i*5.3).toFixed(1)+'" text-anchor="middle" font-size="'+f+'" font-weight="700" font-family="Georgia,serif" fill="#6b1630">'+esc(l)+'</text>';});
   const emb=EMBL[hsh(e.id||e.pun)%EMBL.length];
+  // Deux styles de bouteille (« classique » et « moderne »), tirés au hasard à la capture puis mémorisés
+  if((e.sty||(((Math.imul(hsh([e.domaine,e.name,e.appellation,e.vintage].join('|')),2654435761)>>>16)%100)<50?'m':'c'))==='m'){
+    const g='dm'+id,lx=sh.x+1.8,lw=sh.w-3.6,ap=String(e.appellation||'').replace(/\([^)]*\)/g,'').trim().toUpperCase().slice(0,18),
+      fs=Math.max(2.3,Math.min(3.9,(lw-2)/(Math.max(ap.length,1)*.7))),vf=Math.min(9.5,lw*.3),
+      tint=(lv!=null&&lv<145)?'<rect x="'+lx+'" y="'+Math.max(lv,96).toFixed(1)+'" width="'+lw+'" height="'+(145-Math.max(lv,96)).toFixed(1)+'" fill="'+p[1]+'" opacity=".2"/>':'';
+    return '<svg viewBox="-8 0 76 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>'
+     +'<linearGradient id="'+g+'g" x1="0" x2="1"><stop offset="0" stop-color="'+p[0]+'"/><stop offset=".45" stop-color="'+p[1]+'"/><stop offset="1" stop-color="'+p[0]+'"/></linearGradient>'
+     +'<clipPath id="'+g+'c"><path d="'+sh.p+'"/></clipPath>'
+     +'<linearGradient id="'+g+'s" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".18" stop-color="#fff" stop-opacity=".6"/><stop offset=".38" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>'
+     +'<ellipse cx="34" cy="172" rx="'+(sh.w*.62).toFixed(1)+'" ry="3.6" fill="#3a0f1c" opacity=".18"/>'
+     +'<g transform="rotate(-6 30 168)">'
+     +'<path d="'+sh.p+'" fill="'+(lv==null?'url(#'+g+'g)':'#eef0f1')+'"/>'
+     +(lv==null?'':'<rect x="0" y="'+lv.toFixed(1)+'" width="60" height="'+(172-lv).toFixed(1)+'" fill="url(#'+g+'g)" clip-path="url(#'+g+'c)"/><rect x="0" y="'+lv.toFixed(1)+'" width="60" height="2.2" fill="#fff" opacity=".55" clip-path="url(#'+g+'c)"/>')
+     +'<path d="'+sh.p+'" fill="none" stroke="#b9a3a8" stroke-width="1"/>'
+     +'<path d="M'+(sh.x+2.5)+' 98V152Q'+(sh.x+2.5)+' 162 '+(sh.x+9)+' 163" stroke="#fff" stroke-width="2.4" stroke-linecap="round" fill="none" opacity=".5"/><path d="M27.4 18V46" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".5"/>'
+     +'<rect x="23" y="3" width="14" height="25" rx="2.5" fill="'+cap+'"/><rect x="23" y="3" width="14" height="25" rx="2.5" fill="url(#'+g+'s)"/><rect x="23" y="23" width="14" height="2" fill="#000" opacity=".12"/>'
+     +'<rect x="'+lx+'" y="95" width="'+lw+'" height="52" rx="3" fill="#fdf4ea"/>'+tint+'<rect x="'+lx+'" y="95" width="'+lw+'" height="52" rx="3" fill="none" stroke="#c9a24a" stroke-width=".8"/>'
+     +'<text x="30" y="108" text-anchor="middle" font-size="'+fs.toFixed(2)+'" font-weight="800" letter-spacing=".35" font-family="Georgia,serif" fill="#85213f">'+esc(ap)+'</text>'
+     +'<line x1="'+(lx+4)+'" x2="'+(lx+lw-4)+'" y1="112" y2="112" stroke="#c9a24a" stroke-width=".6"/>'
+     +'<text x="30" y="'+(132+vf*.1).toFixed(1)+'" text-anchor="middle" font-size="'+vf.toFixed(1)+'" font-weight="800" font-family="Georgia,serif" fill="#6b1630">'+esc(e.vintage||'NV')+'</text></g></svg>';
+  }
   return '<svg viewBox="0 0 60 172" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="'+id+'" x1="0" x2="1"><stop offset="0" stop-color="'+p[0]+'"/><stop offset=".5" stop-color="'+p[1]+'"/><stop offset="1" stop-color="'+p[0]+'"/></linearGradient></defs>'
    +(lv==null?'<path d="'+sh.p+'" fill="url(#'+id+')"/>'
      :'<clipPath id="'+id+'c"><path d="'+sh.p+'"/></clipPath><path d="'+sh.p+'" fill="#f1e7e8"/><rect x="0" y="'+lv.toFixed(1)+'" width="60" height="'+(172-lv).toFixed(1)+'" fill="url(#'+id+')" clip-path="url(#'+id+'c)"/><path d="'+sh.p+'" fill="none" stroke="#bfa3a8" stroke-width=".9"/>')
@@ -1482,6 +1511,7 @@ function dexAdd(v){
   const id='dx'+uid();
   const e={id:id,dex:true,num:num,ean:ean,domaine:dom,name:cuv,appellation:app,vintage:vin,color:color,date:new Date().toISOString().slice(0,10),tastings:[],fiche:v.fiche||snapFiche(bestFiche({domaine:dom,appellation:app,name:cuv,vintage:vin}))};
   e.region=regionOf(app);
+  e.sty=Math.random()<.5?'m':'c';
   e.pun=punFor(app,color,hsh(id+app+dom));
   S.dex.push(e);
   if(ean)S.eans[ean]={domaine:dom,cuvee:cuv,appellation:app,vintage:vin,color:color};
@@ -1676,7 +1706,28 @@ function dexDisc(){
 }
 function dxTile(e){
   const r=rar(e);
-  return '<button class="dxt r'+r.i+'" data-id="'+e.id+'"><span class="n">N° '+pad3(e.num)+'</span>'+(e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(e)+'</div>'+(r.rated?'<span class="nb">'+dxLast(e).total+'</span>':'')+'<h4>'+esc(e.pun)+'</h4><small>'+esc((e.appellation||dxName(e))+(e.vintage?' '+e.vintage:''))+'</small>'+(e.domaine?'<small class="dm">'+esc(e.domaine)+'</small>':'')+'<span class="rr"><b>'+r.t+'</b> · '+r.l+'</span>'+(r.rated?'':'<span class="mn">À noter</span>')+'</button>';
+  return '<button class="dxt r'+r.i+'" data-id="'+e.id+'"><span class="n">N° '+pad3(e.num)+'</span>'+(e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(e)+'</div>'+'<span class="nb'+(r.rated?'':' no')+'">'+(r.rated?'<b>'+dxLast(e).total+'</b><i>/100</i>':'À noter')+'</span><h4>'+esc(e.pun)+'</h4><small>'+esc((e.appellation||dxName(e))+(e.vintage?' '+e.vintage:''))+'</small>'+(e.domaine?'<small class="dm">'+esc(e.domaine)+'</small>':'')+'<span class="rr"><b>'+r.t+'</b> · '+r.l+'</span>'+'</button>';
+}
+/* --- Guide des raretés : les 5 catégories avec une carte exemple --- */
+function openRar(){
+  const ex=[
+   {a:'Bordeaux',v:'2023',c:'R',d:'Château Exemple',p:'Bord-eau !',n:62,t:'Les grandes appellations régionales, les IGP et les vins de France, surtout jeunes. Il y en a partout : Bordeaux, Côtes du Rhône, Pays d’Oc…'},
+   {a:'Morgon',v:'2022',c:'R',d:'Domaine Exemple',p:'Bon Morgon !',n:71,t:'Les appellations « villages » ou communales de taille moyenne à grande, avec quelques années de bouteille.'},
+   {a:'Meursault',v:'2019',c:'B',d:'Domaine Exemple',p:'Meursault qui peut',n:78,t:'Les petites appellations communales, les premiers crus et les vins déjà un peu âgés.'},
+   {a:'Alsace Grand Cru',v:'2018',c:'B',d:'Domaine Exemple',p:'Grand cru, grand sourire',n:88,t:'Les grands crus de surface moyenne, ou les premiers crus rares avec de l’âge.'},
+   {a:'Romanée-Conti',v:'1990',c:'R',d:'Domaine Exemple',p:'Conti-nue comme ça',n:96,t:'Les tout petits grands crus (Romanée-Conti, Montrachet, La Tâche…), encore plus si le millésime est ancien.'}
+  ];
+  const rows=ex.map((x,i)=>{
+    const e={id:'ex'+i,num:i+1,dex:true,appellation:x.a,vintage:x.v,color:x.c,domaine:x.d,name:'',pun:x.p,tastings:[{date:'2026-01-01',total:x.n,mode:'beg'}],sty:['c','m','m','c','m'][i]};
+    const r=rar(e),lo=[0,25,40,55,70][r.i-1],hi=[24,39,54,69,100][r.i-1];
+    const tile=dxTile(e).replace(/<span class="n">[^<]*<\/span>/,'<span class="n">EXEMPLE</span>').replace(/ data-id="[^"]*"/,'');
+    return '<div class="rarow">'+tile+'<div class="rtx"><h4 style="color:'+['','#9a8d90','#4f9e69','#3f8fdc','#9b5fd0','#d49a1c'][r.i]+'">'+r.t+'</h4><span class="rsc">score '+lo+' à '+hi+'</span><p>'+esc(x.t)+'</p></div></div>';
+  }).reverse().join('');
+  openSheet('<h3 class="sh">Les 5 raretés</h3><div class="note" style="margin-top:-8px">La rareté d’une carte est la même pour tous les joueurs. Elle est calculée sur 3 critères : la surface de l’appellation (plus elle est petite, plus c’est rare), son classement (grand cru, premier cru, village…) et l’âge du millésime.</div>'
+   +'<div style="margin-top:16px">'+rows+'</div>'
+   +'<p class="note">Ta note, elle, reste personnelle : elle apparaît dans la pastille en haut de la carte et dans le niveau de la bouteille, sans changer la rareté.</p>'
+   +'<div class="sbar"><button class="btn ghost" id="rr-back" style="flex:none">Retour</button><button class="btn" data-close>Fermer</button></div>');
+  $('#rr-back').addEventListener('click',()=>openDex());
 }
 function openDex(tab){
   stopScan();DX.pending=null;
@@ -1694,11 +1745,11 @@ function openDex(tab){
     grid=Object.keys(byR).sort((a,b)=>{const x=RO.indexOf(a),y=RO.indexOf(b);return (x<0?9:x)-(y<0?9:y)||a.localeCompare(b,'fr');}).map(r=>{
       const l=byR[r].sort((x,y)=>x.a.name.localeCompare(y.a.name,'fr')),n=l.filter(x=>x.e).length;
       return '<h4 class="dxreg">'+esc(r)+' <small>'+n+'/'+l.length+'</small></h4><div class="dxgrid">'+l.map(x=>x.e
-        ?'<button class="dxt r'+rar(x.e).i+'" data-id="'+x.e.id+'"><span class="n">N° '+pad3(x.e.num)+'</span>'+(x.e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(x.e)+'</div>'+(dxLast(x.e)?'<span class="nb">'+dxLast(x.e).total+'</span>':'')+'<h4>'+esc(x.a.name)+'</h4><small>'+esc(x.e.pun)+'</small>'+(x.n>1?'<span class="mn">'+x.n+' captures · meilleure note</span>':'')+'</button>'
+        ?'<button class="dxt r'+rar(x.e).i+'" data-id="'+x.e.id+'"><span class="n">N° '+pad3(x.e.num)+'</span>'+(x.e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(x.e)+'</div>'+'<span class="nb'+(dxLast(x.e)?'':' no')+'">'+(dxLast(x.e)?'<b>'+dxLast(x.e).total+'</b><i>/100</i>':'À noter')+'</span><h4>'+esc(x.a.name)+'</h4><small>'+esc(x.e.pun)+'</small>'+(x.n>1?'<span class="mn">'+x.n+' captures · meilleure note</span>':'')+'</button>'
         :'<button class="dxt locked" data-lock="'+esc(x.a.region)+'|'+x.a.color+'"><span class="n">N° ???</span><div class="bt">'+dexBottle({},true)+'</div><h4>? ? ?</h4><small>'+esc(x.a.region)+' · '+CNAME[x.a.color]+'</small></button>').join('')+'</div>';
     }).join('');
   }
-  openSheet('<h3 class="sh">Wineadex</h3><div class="note" style="margin-top:-8px">Scanne n\'importe quelle bouteille, note-la, débloque sa carte. Rien de tout ça n\'entre dans ta cave.</div>'
+  openSheet('<h3 class="sh">Wineadex</h3><div class="note" style="margin-top:-8px">Scanne n\'importe quelle bouteille, note-la, débloque sa carte. Rien de tout ça n\'entre dans ta cave.</div><button class="dxlink" id="dx-rar">Voir les 5 raretés →</button>'
    +'<div class="stat4"><div><small>Captures</small><b>'+S.dex.length+'</b></div><div><small>Appellations débloquées</small><b>'+found+'/'+disc.length+'</b></div><div><small>Régions</small><b>'+regs+'</b></div><div><small>Note moyenne</small><b>'+(rated.length?avg:'–')+'</b></div></div>'
    +'<div class="seg2" id="dxseg"><button data-t="cap" class="'+(DX.tab==='cap'?'on':'')+'">Mes captures</button><button data-t="app" class="'+(DX.tab==='app'?'on':'')+'">Appellations</button></div>'
    +'<div id="dxbody">'+grid+'</div>'
@@ -1706,6 +1757,7 @@ function openDex(tab){
    +'<div class="sbar"><button class="btn ghost" data-close style="flex:none">Fermer</button><button class="btn" id="dx-scan">'+IC.scan.replace('<svg','<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:6px"')+'Scanner</button></div>');
   $('#dxseg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)openDex(b.dataset.t);});
   $('#dx-scan').addEventListener('click',openScan);
+  $('#dx-rar').addEventListener('click',openRar);
   const dt=$('#dx-deltest');if(dt)dt.addEventListener('click',()=>{const n=S.dex.filter(e=>e.demo).length;if(confirm('Supprimer les '+n+' cartes test ?')){S.dex=S.dex.filter(e=>!e.demo);save();renderHome();openDex();toast(n+' cartes test supprimées');}});
   $('#dxbody').addEventListener('click',e=>{
     const t=e.target.closest('.dxt');if(!t)return;
@@ -1717,7 +1769,7 @@ function openDexEntry(id){
   const e=get(id);if(!e||!e.dex){openDex();return;}
   const r=rar(e),ts=(e.tastings||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   const a=aocByKey(e.appellation,e.color);
-  openSheet('<div class="dxhero r'+r.i+'"><div class="dxbig">'+dexBottle(e)+'</div>'+(r.rated?'<span class="nbig" title="Ma note">'+dxLast(e).total+'</span>':'')+'</div>'
+  openSheet('<div class="dxhero r'+r.i+'"><div class="dxbig">'+dexBottle(e)+'</div>'+'<span class="nbig'+(r.rated?'':' no')+'">'+(r.rated?'<small>MA NOTE</small><span><b>'+dxLast(e).total+'</b><i>/100</i></span>':'À noter')+'</span>'+'</div>'
    +'<div style="text-align:center"><div class="dxnum" style="color:'+['','#9a8d90','#4f9e69','#3f8fdc','#9b5fd0','#d49a1c'][r.i]+'">N° '+pad3(e.num)+' · '+r.t.toUpperCase()+'</div><h3 class="dxpun">'+esc(e.pun)+'</h3><p class="note" style="margin:6px 0 2px"><b>'+esc(dxName(e))+'</b></p>'
    +'<div class="chips dxc" style="justify-content:center;margin-bottom:14px">'+[e.demo?'Carte test':'',e.vintage||'NV',e.appellation,CNAME[e.color],e.region||regionOf(e.appellation)].filter(Boolean).map(x=>'<span class="chip">'+esc(x)+'</span>').join('')+'</div></div>'
    +'<div class="grp"><div class="gh"><b>Rareté de la carte</b><span style="font-weight:800;color:var(--wine2)">'+r.v+'/100</span></div>'+r.parts.map(q=>'<div class="bar"><span>'+q.k+'</span><span class="tr"><i style="width:'+Math.round(q.p/q.m*100)+'%"></i></span><span>'+q.p+'</span></div><p class="note" style="margin:-4px 0 8px">'+esc(q.d)+'</p>').join('')+'<p class="note" style="margin:2px 0 0">Même rareté pour tous les joueurs : elle ne dépend que de l’appellation, du classement et du millésime.</p></div>'
@@ -1739,18 +1791,12 @@ function openDexEntry(id){
 
 /* --- Cartes test (une seule fois ; supprimées, elles ne reviennent pas) --- */
 function seedDex(){
-  if(S.dexSeeded)return;
-  S.dexSeeded=true;
-  const today=new Date().toISOString().slice(0,10);
-  [['Pouilly-Fuissé',93,'exp'],['Morgon',86,'beg'],['Gevrey-Chambertin',78,'exp'],['Chablis Premier Cru',67,'beg'],['Saint-Véran',52,'beg'],['Crémant',0,'']].forEach(x=>{
-    const f=searchFiches(x[0]).find(g=>g.nez&&g.nez.length&&g.vintage);
-    if(!f)return;
-    const r=dexAdd({domaine:f.domaine,cuvee:f.cuvee,appellation:f.appellation,vintage:f.vintage,color:f.color,fiche:snapFiche(f)});
-    if(!r.e)return;
-    r.e.demo=true;
-    if(x[1])r.e.tastings.push({id:uid(),date:today,mode:x[2],scores:{},total:x[1],desc:null,nez:[],bou:[],notes:'Carte test'});
-  });
-  save();
+  // Plus de cartes test : on retire celles d'anciennes versions, puis on ne recrée jamais rien.
+  const n=S.dex.length;S.dex=S.dex.filter(e=>!e.demo);
+  let mig=n!==S.dex.length;
+  S.dex.forEach(e=>{if(!e.sty){e.sty=Math.random()<.5?'m':'c';mig=true;}});  // style de bouteille tiré au hasard une fois pour toutes
+  if(!S.dexSeeded){S.dexSeeded=true;mig=true;}
+  if(mig)save();
 }
 function dexBanner(){
   const last=S.dex.slice().sort((a,b)=>b.num-a.num)[0];
