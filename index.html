@@ -262,6 +262,9 @@ details.est{margin-top:14px}details.est summary{cursor:pointer;font-weight:700;c
 .dxt.locked h4{color:#bba5a9}
 .dxt.r2{border-color:var(--sage)}.dxt.r3{border-color:#e8a94a}.dxt.r4{border-color:#9b5fd0}
 .dxt.r5{border-color:var(--gold);box-shadow:0 0 0 3px rgba(243,201,105,.4)}
+.dxoth{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 0;border-bottom:1px solid #f0dfe1;color:var(--wine)}
+.dxoth:last-child{border-bottom:0}.dxoth small{display:block;color:var(--muted);font-size:12px;margin-top:1px}.dxoth em{font-style:normal;font-weight:800;color:var(--wine2);white-space:nowrap}
+.dxt small.dm{margin-top:1px;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
 .dxt .mn{display:block;margin-top:3px;font-size:11px;font-weight:700;color:var(--muted)}
 .dxt .demo{position:absolute;right:10px;top:7px;font-size:9.5px;font-weight:800;letter-spacing:.06em;background:var(--gold);color:var(--wine);border-radius:8px;padding:2px 7px}
 .dxreg{margin:18px 0 0;font-size:15px;color:var(--wine)}
@@ -618,6 +621,38 @@ function openSheet(html){
 }
 function closeSheet(){stopScan();$('#sheet').classList.remove('on');$('#backdrop').classList.remove('on');}
 $('#backdrop').addEventListener('click',closeSheet);
+/* Glisser vers le bas pour fermer (poignée en haut de la fenêtre, ou depuis le haut du contenu) */
+(function(){
+  const sh=$('#sheet'),bd=$('#backdrop');let y0=0,x0=0,drag=false,armed=false,dy=0,t0=0;
+  sh.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1||!sh.classList.contains('on'))return;
+    const t=e.touches[0],top=sh.getBoundingClientRect().top;
+    y0=t.clientY;x0=t.clientX;t0=Date.now();dy=0;drag=false;
+    armed=sh.scrollTop<=0||(t.clientY-top)<48;
+  },{passive:true});
+  sh.addEventListener('touchmove',e=>{
+    if(!armed)return;
+    const t=e.touches[0],ddy=t.clientY-y0,ddx=t.clientX-x0;
+    if(!drag){
+      if(ddy>10&&ddy>Math.abs(ddx)*1.5&&sh.scrollTop<=0){drag=true;sh.style.transition='none';}
+      else if(ddy<-6||Math.abs(ddx)>ddy+10){armed=false;return;}
+      else return;
+    }
+    dy=Math.max(0,ddy);
+    if(e.cancelable)e.preventDefault();
+    sh.style.transform='translateY('+dy+'px)';
+    bd.style.opacity=String(Math.max(.15,1-dy/500));
+  },{passive:false});
+  const end=()=>{
+    if(!drag){armed=false;return;}
+    drag=false;armed=false;
+    const fast=dy/Math.max(1,Date.now()-t0)>.6;
+    sh.style.transition='';bd.style.opacity='';
+    if(dy>110||(fast&&dy>40)){closeSheet();}
+    sh.style.transform='';
+  };
+  sh.addEventListener('touchend',end);sh.addEventListener('touchcancel',end);
+})();
 
 /* ============ Accueil ============ */
 function renderHome(){
@@ -1623,11 +1658,12 @@ function dexReveal(e){
 }
 function dexDisc(){
   const L=aocItems(),cnt={};L.forEach(a=>{const k=appKey(a.name);cnt[k]=(cnt[k]||0)+1;});
-  return L.map(a=>{const k=appKey(a.name);return{a:a,e:S.dex.filter(e=>appKey(e.appellation)===k&&(cnt[k]===1||e.color===a.color)).sort((x,y)=>x.num-y.num)[0]||null};});
+  const nt=e=>{const t=dxLast(e);return t?t.total:-1;};
+  return L.map(a=>{const k=appKey(a.name);const m=S.dex.filter(e=>appKey(e.appellation)===k&&(cnt[k]===1||e.color===a.color)).sort((x,y)=>nt(y)-nt(x)||x.num-y.num);return{a:a,e:m[0]||null,n:m.length};});
 }
 function dxTile(e){
   const r=rar(e);
-  return '<button class="dxt r'+r.i+'" data-id="'+e.id+'"><span class="n">N° '+pad3(e.num)+'</span>'+(e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(e)+'</div><h4>'+esc(e.pun)+'</h4><small>'+esc((e.appellation||dxName(e))+(e.vintage?' '+e.vintage:''))+'</small><span class="rr"><b>'+r.t+'</b> · '+r.l+'</span><span class="mn">'+(r.rated?'Ma note : '+dxLast(e).total:'À noter')+'</span></button>';
+  return '<button class="dxt r'+r.i+'" data-id="'+e.id+'"><span class="n">N° '+pad3(e.num)+'</span>'+(e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(e)+'</div><h4>'+esc(e.pun)+'</h4><small>'+esc((e.appellation||dxName(e))+(e.vintage?' '+e.vintage:''))+'</small>'+(e.domaine?'<small class="dm">'+esc(e.domaine)+'</small>':'')+'<span class="rr"><b>'+r.t+'</b> · '+r.l+'</span><span class="mn">'+(r.rated?'Ma note : '+dxLast(e).total:'À noter')+'</span></button>';
 }
 function openDex(tab){
   stopScan();DX.pending=null;
@@ -1645,7 +1681,7 @@ function openDex(tab){
     grid=Object.keys(byR).sort((a,b)=>{const x=RO.indexOf(a),y=RO.indexOf(b);return (x<0?9:x)-(y<0?9:y)||a.localeCompare(b,'fr');}).map(r=>{
       const l=byR[r].sort((x,y)=>x.a.name.localeCompare(y.a.name,'fr')),n=l.filter(x=>x.e).length;
       return '<h4 class="dxreg">'+esc(r)+' <small>'+n+'/'+l.length+'</small></h4><div class="dxgrid">'+l.map(x=>x.e
-        ?'<button class="dxt r'+rar(x.e).i+'" data-id="'+x.e.id+'"><span class="n">N° '+pad3(x.e.num)+'</span>'+(x.e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(x.e)+'</div><h4>'+esc(x.a.name)+'</h4><small>'+esc(x.e.pun)+'</small></button>'
+        ?'<button class="dxt r'+rar(x.e).i+'" data-id="'+x.e.id+'"><span class="n">N° '+pad3(x.e.num)+'</span>'+(x.e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(x.e)+'</div><h4>'+esc(x.a.name)+'</h4><small>'+esc(x.e.pun)+'</small>'+(x.n>1?'<span class="mn">'+x.n+' captures · meilleure note</span>':'')+'</button>'
         :'<button class="dxt locked" data-lock="'+esc(x.a.region)+'|'+x.a.color+'"><span class="n">N° ???</span><div class="bt">'+dexBottle({},true)+'</div><h4>? ? ?</h4><small>'+esc(x.a.region)+' · '+CNAME[x.a.color]+'</small></button>').join('')+'</div>';
     }).join('');
   }
@@ -1672,12 +1708,18 @@ function openDexEntry(id){
    +'<div style="text-align:center"><div class="dxnum">N° '+pad3(e.num)+' · '+r.t.toUpperCase()+'</div><h3 class="dxpun">'+esc(e.pun)+'</h3><p class="note" style="margin:6px 0 2px"><b>'+esc(dxName(e))+'</b></p>'
    +'<div class="chips dxc" style="justify-content:center;margin-bottom:14px">'+[e.demo?'Carte test':'',e.vintage||'NV',e.appellation,CNAME[e.color],e.region||regionOf(e.appellation)].filter(Boolean).map(x=>'<span class="chip">'+esc(x)+'</span>').join('')+'</div></div>'
    +'<div class="grp"><div class="gh"><b>Rareté de la carte</b><span style="font-weight:800;color:var(--wine2)">'+r.v+'/100</span></div>'+r.parts.map(q=>'<div class="bar"><span>'+q.k+'</span><span class="tr"><i style="width:'+Math.round(q.p/q.m*100)+'%"></i></span><span>'+q.p+'</span></div><p class="note" style="margin:-4px 0 8px">'+esc(q.d)+'</p>').join('')+'<p class="note" style="margin:2px 0 0">Même rareté pour tous les joueurs : elle ne dépend que de l’appellation, du classement et du millésime.</p></div>'
-   +'<div class="grp"><div class="gh"><b>Mes notes</b>'+(r.rated?'<span style="font-weight:800;color:var(--wine2)">'+dxLast(e).total+'/100</span>':'')+'</div><p class="note" style="margin:0 0 6px">Le niveau de vin dans la bouteille suit ta dernière note. Elle est personnelle : elle ne change pas la rareté de la carte.</p>'
+   +'<div class="grp"><div class="gh"><b>Mes notes</b>'+(r.rated?'<span style="font-weight:800;color:var(--wine2)">'+dxLast(e).total+'/100</span>':'')+'</div><p class="note" style="margin:6px 0 8px">Le niveau de vin dans la bouteille suit ta dernière note. Elle est personnelle : elle ne change pas la rareté de la carte.</p>'
    +(ts.length?ts.map(t=>'<div class="dxt-row"><b>'+t.total+'/100</b> · '+label(t.total)+'<small>'+esc(t.date)+' · '+(t.mode==='exp'?'Expert':'Débutant')+'</small></div>'+(t.notes?'<p class="note" style="margin:0 0 8px">'+esc(t.notes)+'</p>':'')).join(''):'<p class="note">Pas encore noté : la bouteille est pleine. Note-la pour voir son niveau descendre ou monter selon ta note.</p>')
    +'</div>'
+   +(function(){
+     const k=appKey(e.appellation),nt=x=>{const t=dxLast(x);return t?t.total:-1;};
+     const o=S.dex.filter(x=>x.id!==e.id&&appKey(x.appellation)===k&&x.color===e.color).sort((a,b)=>nt(b)-nt(a)||a.num-b.num);
+     return o.length?'<h4 class="dxh4">Autres captures de cette appellation</h4><div class="grp" style="padding:4px 14px">'+o.map(x=>{const t=dxLast(x);return '<button class="dxoth" data-oid="'+x.id+'"><span><b>'+esc(x.pun)+'</b><small>'+esc([x.domaine,x.vintage].filter(Boolean).join(' · ')||dxName(x))+'</small></span><em>'+(t?t.total+'/100':'à noter')+'</em></button>';}).join('')+'</div>':'';
+   })()
    +(e.fiche?'<h4 class="dxh4">Fiche du guide</h4><div class="dxc">'+ficheHTML(e.fiche)+'</div>':(a?'<h4 class="dxh4">Profil type de l\'appellation</h4><p class="note">'+esc(a.cepages)+'</p><div class="dxc">'+chipsH(a.aromas)+'</div>':''))
    +'<div class="sbar"><button class="btn ghost" id="de-back" style="flex:none">Retour</button><button class="btn ghost" id="de-del" style="flex:none" aria-label="Supprimer">'+IC.trash.replace('<svg','<svg style="width:20px;height:20px"')+'</button><button class="btn" id="de-rate">'+(ts.length?'Noter à nouveau':'Noter ce vin')+'</button></div>');
   $('#de-back').addEventListener('click',()=>openDex());
+  $$('.dxoth',$('#sheet')).forEach(b=>b.addEventListener('click',()=>openDexEntry(b.dataset.oid)));
   $('#de-rate').addEventListener('click',()=>openTasting(e.id));
   $('#de-del').addEventListener('click',()=>{if(confirm('Retirer cette carte de ton Wineadex ?')){S.dex=S.dex.filter(x=>x.id!==e.id);save();renderHome();openDex();toast('Carte retirée');}});
 }
