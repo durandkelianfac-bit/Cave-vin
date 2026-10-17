@@ -251,7 +251,7 @@ details.est{margin-top:14px}details.est summary{cursor:pointer;font-weight:700;c
 .dexban .dbs{width:46px;height:46px;border-radius:50%;background:var(--wine);color:var(--rose);display:grid;place-items:center;flex:none}
 .dexban .dbs svg{width:24px;height:24px}
 .dxgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0 18px}
-.dxt{position:relative;background:#fff;border-radius:22px;padding:22px 8px 12px;text-align:center;border:2.5px solid #f0dfe1;display:block;width:100%}
+.dxt{position:relative;background:#fff;border-radius:22px;padding:22px 8px 12px;text-align:center;border:4px solid #e2d6d8;display:block;width:100%;--rc:#9a8d90}
 .dxt .n{position:absolute;left:12px;top:8px;font-size:10.5px;font-weight:800;color:var(--wine2);letter-spacing:.04em}
 .dxt .bt{height:118px;display:grid;place-items:center}
 .dxt .bt svg{height:112px;width:auto}
@@ -260,8 +260,19 @@ details.est{margin-top:14px}details.est summary{cursor:pointer;font-weight:700;c
 .dxt .rr{display:block;margin-top:6px;font-size:11px;font-weight:700;color:var(--wine2)}
 .dxt.locked{background:#f7eeee;border-style:dashed;border-color:#e6d6d9}
 .dxt.locked h4{color:#bba5a9}
-.dxt.r2{border-color:var(--sage)}.dxt.r3{border-color:#e8a94a}.dxt.r4{border-color:#9b5fd0}
-.dxt.r5{border-color:var(--gold);box-shadow:0 0 0 3px rgba(243,201,105,.4)}
+.dxt.r2,.dxt.r3,.dxt.r4,.dxt.r5{border-color:transparent;background:linear-gradient(180deg,var(--tt) 0,#fff 62%) padding-box,linear-gradient(135deg,var(--g1),var(--g2),var(--g1)) border-box}
+.dxt.r2{--rc:#4f9e69;--tt:#e7f4ea;--g1:#8bc99a;--g2:#4f9e69;box-shadow:0 3px 10px rgba(79,158,105,.25)}
+.dxt.r3{--rc:#3f8fdc;--tt:#e3f0fc;--g1:#7bb8f0;--g2:#2f6fc0;box-shadow:0 3px 12px rgba(63,143,220,.35)}
+.dxt.r4{--rc:#9b5fd0;--tt:#f1e6fb;--g1:#c79af0;--g2:#e06aa8;box-shadow:0 4px 16px rgba(155,95,208,.45)}
+.dxt.r5{--rc:#d49a1c;--tt:#fff6d6;--g1:#f7d56b;--g2:#e0a21c;background-size:100% 100%,300% 300%;animation:dxshine 3.5s linear infinite;box-shadow:0 4px 20px rgba(240,190,60,.65)}
+.dxt.r5 .rr{color:#4a2a00;background:linear-gradient(90deg,#f7d56b,#ffe9a0,#f0b93a)}
+@keyframes dxshine{0%{background-position:0 0,0% 50%}100%{background-position:0 0,300% 50%}}
+@media (prefers-reduced-motion:reduce){.dxt.r5{animation:none}}
+.dxt .rr{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:999px;background:var(--rc);color:#fff;font-size:10.5px;letter-spacing:0;white-space:nowrap}
+.dxt .rr b{color:inherit}
+.dxt .nb,.dxhero .nbig{position:absolute;display:grid;place-items:center;border-radius:50%;background:#fffaf2;border:2px solid var(--wine2);color:var(--wine2);font-weight:800;box-shadow:0 1px 3px rgba(60,20,30,.2)}
+.dxt .nb{right:10px;top:112px;width:30px;height:30px;font-size:12px}
+.dxhero .nbig{right:16px;bottom:14px;width:50px;height:50px;font-size:18px;border-width:3px}
 .dxoth{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 0;border-bottom:1px solid #f0dfe1;color:var(--wine)}
 .dxoth:last-child{border-bottom:0}.dxoth small{display:block;color:var(--muted);font-size:12px;margin-top:1px}.dxoth em{font-style:normal;font-weight:800;color:var(--wine2);white-space:nowrap}
 .dxt small.dm{margin-top:1px;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
@@ -270,6 +281,8 @@ details.est{margin-top:14px}details.est summary{cursor:pointer;font-weight:700;c
 .dxreg{margin:18px 0 0;font-size:15px;color:var(--wine)}
 .dxreg small{color:var(--muted);font-weight:700;margin-left:6px}
 .dxhero{position:relative;display:grid;place-items:center;padding:20px 0 12px;margin:0 -8px 8px;border-radius:30px;background:radial-gradient(circle at 50% 45%,#fff 0,var(--rose2) 55%,var(--rose) 100%)}
+.dxhero.r2{background:radial-gradient(circle at 50% 45%,#fff 0,#e7f4ea 55%,#bfe0c7 100%)}
+.dxhero.r3{background:radial-gradient(circle at 50% 45%,#fff 0,#e3f0fc 55%,#b5d6f5 100%)}
 .dxhero.r4{background:radial-gradient(circle at 50% 45%,#fff 0,#efe3f8 55%,#d9c2ee 100%)}
 .dxhero.r5{background:radial-gradient(circle at 50% 45%,#fffbe8 0,#fbefc4 55%,#f3c969 100%)}
 .dxbig svg{height:250px;width:auto;display:block;filter:drop-shadow(0 8px 10px rgba(107,22,48,.25))}
@@ -1412,7 +1425,7 @@ function dexBottle(e,locked){
   if(locked){
     return '<svg viewBox="0 0 60 172" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="'+sh.p+'" fill="#e6d6d9"/><rect x="23" y="3" width="14" height="25" rx="2.5" fill="#d8c5c9"/><text x="30" y="118" text-anchor="middle" font-size="26" font-weight="800" font-family="Georgia,serif" fill="#fff" opacity=".9">?</text></svg>';
   }
-  const p=BC[e.color]||BC.R,cap=rar(e).i>=4?'#f3c969':p[2],lt=dxLast(e),lv=lt?Math.max(20,Math.min(168,168-148*lt.total/100)):null;
+  const p=BC[e.color]||BC.R,cap=rar(e).i>=4?'#f3c969':p[2],lt=dxLast(e),lv=lt?168-138*Math.max(0,Math.min(100,lt.total))/100:null;
   const maxc=Math.floor((sh.w-4)/2.35),f=sh.w<30?3.9:4.4,lines=wrapPun(e.pun||'',maxc,4);
   let txt='';lines.forEach((l,i)=>{txt+='<text x="30" y="'+(119+i*5.3).toFixed(1)+'" text-anchor="middle" font-size="'+f+'" font-weight="700" font-family="Georgia,serif" fill="#6b1630">'+esc(l)+'</text>';});
   const emb=EMBL[hsh(e.id||e.pun)%EMBL.length];
@@ -1663,7 +1676,7 @@ function dexDisc(){
 }
 function dxTile(e){
   const r=rar(e);
-  return '<button class="dxt r'+r.i+'" data-id="'+e.id+'"><span class="n">N° '+pad3(e.num)+'</span>'+(e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(e)+'</div><h4>'+esc(e.pun)+'</h4><small>'+esc((e.appellation||dxName(e))+(e.vintage?' '+e.vintage:''))+'</small>'+(e.domaine?'<small class="dm">'+esc(e.domaine)+'</small>':'')+'<span class="rr"><b>'+r.t+'</b> · '+r.l+'</span><span class="mn">'+(r.rated?'Ma note : '+dxLast(e).total:'À noter')+'</span></button>';
+  return '<button class="dxt r'+r.i+'" data-id="'+e.id+'"><span class="n">N° '+pad3(e.num)+'</span>'+(e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(e)+'</div>'+(r.rated?'<span class="nb">'+dxLast(e).total+'</span>':'')+'<h4>'+esc(e.pun)+'</h4><small>'+esc((e.appellation||dxName(e))+(e.vintage?' '+e.vintage:''))+'</small>'+(e.domaine?'<small class="dm">'+esc(e.domaine)+'</small>':'')+'<span class="rr"><b>'+r.t+'</b> · '+r.l+'</span>'+(r.rated?'':'<span class="mn">À noter</span>')+'</button>';
 }
 function openDex(tab){
   stopScan();DX.pending=null;
@@ -1681,7 +1694,7 @@ function openDex(tab){
     grid=Object.keys(byR).sort((a,b)=>{const x=RO.indexOf(a),y=RO.indexOf(b);return (x<0?9:x)-(y<0?9:y)||a.localeCompare(b,'fr');}).map(r=>{
       const l=byR[r].sort((x,y)=>x.a.name.localeCompare(y.a.name,'fr')),n=l.filter(x=>x.e).length;
       return '<h4 class="dxreg">'+esc(r)+' <small>'+n+'/'+l.length+'</small></h4><div class="dxgrid">'+l.map(x=>x.e
-        ?'<button class="dxt r'+rar(x.e).i+'" data-id="'+x.e.id+'"><span class="n">N° '+pad3(x.e.num)+'</span>'+(x.e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(x.e)+'</div><h4>'+esc(x.a.name)+'</h4><small>'+esc(x.e.pun)+'</small>'+(x.n>1?'<span class="mn">'+x.n+' captures · meilleure note</span>':'')+'</button>'
+        ?'<button class="dxt r'+rar(x.e).i+'" data-id="'+x.e.id+'"><span class="n">N° '+pad3(x.e.num)+'</span>'+(x.e.demo?'<span class="demo">TEST</span>':'')+'<div class="bt">'+dexBottle(x.e)+'</div>'+(dxLast(x.e)?'<span class="nb">'+dxLast(x.e).total+'</span>':'')+'<h4>'+esc(x.a.name)+'</h4><small>'+esc(x.e.pun)+'</small>'+(x.n>1?'<span class="mn">'+x.n+' captures · meilleure note</span>':'')+'</button>'
         :'<button class="dxt locked" data-lock="'+esc(x.a.region)+'|'+x.a.color+'"><span class="n">N° ???</span><div class="bt">'+dexBottle({},true)+'</div><h4>? ? ?</h4><small>'+esc(x.a.region)+' · '+CNAME[x.a.color]+'</small></button>').join('')+'</div>';
     }).join('');
   }
@@ -1704,8 +1717,8 @@ function openDexEntry(id){
   const e=get(id);if(!e||!e.dex){openDex();return;}
   const r=rar(e),ts=(e.tastings||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   const a=aocByKey(e.appellation,e.color);
-  openSheet('<div class="dxhero r'+r.i+'"><div class="dxbig">'+dexBottle(e)+'</div></div>'
-   +'<div style="text-align:center"><div class="dxnum">N° '+pad3(e.num)+' · '+r.t.toUpperCase()+'</div><h3 class="dxpun">'+esc(e.pun)+'</h3><p class="note" style="margin:6px 0 2px"><b>'+esc(dxName(e))+'</b></p>'
+  openSheet('<div class="dxhero r'+r.i+'"><div class="dxbig">'+dexBottle(e)+'</div>'+(r.rated?'<span class="nbig" title="Ma note">'+dxLast(e).total+'</span>':'')+'</div>'
+   +'<div style="text-align:center"><div class="dxnum" style="color:'+['','#9a8d90','#4f9e69','#3f8fdc','#9b5fd0','#d49a1c'][r.i]+'">N° '+pad3(e.num)+' · '+r.t.toUpperCase()+'</div><h3 class="dxpun">'+esc(e.pun)+'</h3><p class="note" style="margin:6px 0 2px"><b>'+esc(dxName(e))+'</b></p>'
    +'<div class="chips dxc" style="justify-content:center;margin-bottom:14px">'+[e.demo?'Carte test':'',e.vintage||'NV',e.appellation,CNAME[e.color],e.region||regionOf(e.appellation)].filter(Boolean).map(x=>'<span class="chip">'+esc(x)+'</span>').join('')+'</div></div>'
    +'<div class="grp"><div class="gh"><b>Rareté de la carte</b><span style="font-weight:800;color:var(--wine2)">'+r.v+'/100</span></div>'+r.parts.map(q=>'<div class="bar"><span>'+q.k+'</span><span class="tr"><i style="width:'+Math.round(q.p/q.m*100)+'%"></i></span><span>'+q.p+'</span></div><p class="note" style="margin:-4px 0 8px">'+esc(q.d)+'</p>').join('')+'<p class="note" style="margin:2px 0 0">Même rareté pour tous les joueurs : elle ne dépend que de l’appellation, du classement et du millésime.</p></div>'
    +'<div class="grp"><div class="gh"><b>Mes notes</b>'+(r.rated?'<span style="font-weight:800;color:var(--wine2)">'+dxLast(e).total+'/100</span>':'')+'</div><p class="note" style="margin:6px 0 8px">Le niveau de vin dans la bouteille suit ta dernière note. Elle est personnelle : elle ne change pas la rareté de la carte.</p>'
