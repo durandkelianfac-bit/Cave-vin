@@ -778,11 +778,15 @@ $('#detail').addEventListener('click',e=>{
 });
 
 /* ============ Formulaire bouteille ============ */
-function openForm(id,preApp){
-  const b=id?get(id):null,v=b||{qty:1,color:'R',appellation:preApp||''};
+function openForm(id,preApp,pre){
+  const b=id?get(id):null,v=b||Object.assign({qty:1,color:'R',appellation:preApp||''},pre||{});
+  let EAN=(pre&&pre.ean)||(b&&b.ean)||'';
   const doms=Array.from(new Set(S.bottles.map(x=>x.domaine).concat(S.domaines.map(x=>x.domaine),HV.map(x=>x.domaine)).filter(Boolean))).sort();
   const regs=Array.from(new Set(AOC.map(a=>a.region).concat(S.bottles.map(x=>x.region).filter(Boolean)))).sort();
-  openSheet('<h3 class="sh">'+(b?'Modifier la bouteille':'Ajouter une bouteille')+'</h3><div class="form">'
+  openSheet('<h3 class="sh">'+(b?'Modifier la bouteille':'Ajouter une bouteille')+'</h3>'
+  +(b?'':'<button type="button" class="btn" id="f-scan" style="width:100%;margin-bottom:12px">'+IC.scan.replace('<svg','<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:6px"')+'Scanner</button>')
+  +(pre&&pre.note?'<div class="dxnote">'+esc(pre.note)+'</div>':'')
+  +'<div class="form">'
   +'<label>Domaine<input id="f-dom" list="dl-dom" value="'+esc(v.domaine)+'" placeholder="Nom du domaine" autocomplete="off"></label>'
   +'<div class="sugg" id="f-known"></div>'
   +'<label>Cuvée ou nom <small>(facultatif)</small><input id="f-name" value="'+esc(v.name)+'" autocomplete="off"></label>'
@@ -798,7 +802,7 @@ function openForm(id,preApp){
   +'<datalist id="dl-app">'+aocItems().map(a=>'<option value="'+esc(a.name)+'">').join('')+'</datalist>'
   +'<datalist id="dl-reg">'+regs.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist>'
   +'<div class="sbar"><button class="btn ghost" data-close>Annuler</button><button class="btn" id="f-save">Enregistrer</button></div>');
-  const auto={col:!b,reg:!b,cep:!b,from:!b,to:!b};
+  const auto={col:!b&&!(pre&&pre.color),reg:!b&&!(pre&&pre.region),cep:!b&&!(pre&&pre.cepages),from:!b&&!(pre&&pre.from),to:!b&&!(pre&&pre.to)};
   const el={col:$('#f-col'),reg:$('#f-reg'),cep:$('#f-cep'),from:$('#f-from'),to:$('#f-to')};
   Object.keys(el).forEach(k=>el[k].addEventListener('input',()=>{auto[k]=false;}));
   const put=(k,val)=>{if(auto[k]||!el[k].value){el[k].value=val;auto[k]=true;}};
@@ -823,13 +827,22 @@ function openForm(id,preApp){
     $('#f-name').value=f.cuvee;$('#f-app').value=f.appellation;$('#f-vin').value=f.vintage;
     const a=aocOf(f.appellation);$('#f-col').value=f.color;auto.col=false;if(a){auto.reg=true;auto.cep=true;}refresh();});
   known();refresh();
+  const fs_=$('#f-scan');
+  if(fs_)fs_.addEventListener('click',()=>{
+    const g=i=>$('#'+i).value.trim();
+    CAVEPRE={domaine:g('f-dom'),name:g('f-name'),appellation:g('f-app'),vintage:g('f-vin').replace(/\D/g,'').slice(0,4),color:g('f-col'),region:g('f-reg'),cepages:g('f-cep'),qty:Math.max(0,parseInt(g('f-qty'),10)||0),price:g('f-prix'),location:g('f-loc'),from:g('f-from'),to:g('f-to'),notes:g('f-notes')};
+    SCANMODE='cave';openScan();
+  });
   $('#f-save').addEventListener('click',()=>{
     const g=i=>$('#'+i).value.trim();
     const o={id:b?b.id:uid(),domaine:g('f-dom'),name:g('f-name'),appellation:g('f-app'),vintage:g('f-vin').replace(/\D/g,'').slice(0,4),color:g('f-col'),
       region:g('f-reg'),cepages:g('f-cep'),qty:Math.max(0,parseInt(g('f-qty'),10)||0),price:parseFloat(g('f-prix').replace(',','.'))||0,
       location:g('f-loc'),from:g('f-from').replace(/\D/g,'').slice(0,4),to:g('f-to').replace(/\D/g,'').slice(0,4),notes:g('f-notes'),tastings:b?(b.tastings||[]):[]};
+    if(EAN)o.ean=EAN;
     if(!o.domaine&&!o.name&&!o.appellation){toast('Indique au moins un domaine ou une appellation');return;}
+    if(EAN)S.eans[EAN]={domaine:o.domaine,cuvee:o.name,appellation:o.appellation,vintage:o.vintage,color:o.color};
     if(b)S.bottles[S.bottles.indexOf(b)]=o;else S.bottles.push(o);
+    CAVEPRE=null;SCANMODE='dex';
     save();closeSheet();renderHome();if(ST.open)renderDetail();
     toast(b?'Bouteille modifiée':'Bouteille ajoutée');
   });
@@ -1182,7 +1195,7 @@ function isDemo(b){return b&&(b.notes==='Exemple à supprimer'||b.domaine==='Dom
 /* ============ Wineadex : scanne, capture, note, débloque ============ */
 IC.scan='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M11 9v6M14 9v6M17 9v6" stroke-width="1.8"/></svg>';
 const DX={tab:'cap'};
-let SCAN=null;
+let SCAN=null,SCANMODE='dex',CAVEPRE=null,CAVEPEND=null;
 const pad3=n=>String(n).padStart(3,'0');
 function hsh(s){let h=5381;s=String(s);for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return Math.abs(h);}
 
@@ -1567,7 +1580,7 @@ function scanFound(code){
   if(!SCAN||SCAN.done)return;
   SCAN.done=true;stopScan();
   try{navigator.vibrate&&navigator.vibrate(60);}catch(e){}
-  dexResolve(code);
+  scanDone(code);
 }
 function frameGrab(v,rot,cv){
   const vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return null;
@@ -1584,14 +1597,14 @@ function openScan(){
    +'<div class="form"><label>Ou tape les chiffres du code-barres<input id="sc-ean" inputmode="numeric" autocomplete="off" placeholder="ex. 3760123456789"></label></div>'
    +'<div style="display:flex;gap:10px"><button class="btn" id="sc-go">Valider le code</button><button class="btn ghost" id="sc-photo">Photo du code</button></div>'
    +'<input type="file" id="sc-file" accept="image/*" capture="environment" hidden>'
-   +'<button class="btn ghost" id="sc-man" style="width:100%;margin-top:10px">Pas de code-barres : chercher le vin à la main</button>'
+   +'<button class="btn ghost" id="sc-man" style="width:100%;margin-top:10px">'+(SCANMODE==='cave'?'Pas de code-barres : remplir à la main':'Pas de code-barres : chercher le vin à la main')+'</button>'
    +'<div class="sbar"><button class="btn ghost" id="sc-back">Retour</button></div>');
-  $('#sc-back').addEventListener('click',()=>{stopScan();openDex();});
-  $('#sc-man').addEventListener('click',()=>{stopScan();openDexForm({});});
+  $('#sc-back').addEventListener('click',()=>{stopScan();if(SCANMODE==='cave'){SCANMODE='dex';openForm(null,null,CAVEPRE);}else openDex();});
+  $('#sc-man').addEventListener('click',()=>{stopScan();if(SCANMODE==='cave'){SCANMODE='dex';openForm(null,null,CAVEPRE);}else openDexForm({});});
   $('#sc-go').addEventListener('click',()=>{
     const v=$('#sc-ean').value.replace(/\D/g,'');
     if(!eanOk(v)){toast('Code invalide : vérifie les chiffres');return;}
-    stopScan();dexResolve(v);
+    stopScan();scanDone(v);
   });
   $('#sc-ean').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#sc-go').click();}});
   $('#sc-photo').addEventListener('click',()=>$('#sc-file').click());
@@ -1605,7 +1618,7 @@ function openScan(){
         let id=x.getImageData(0,0,w,h),code=window.__zxDecode&&window.__zxDecode(id.data,w,h,true);
         if(!code){const c2=document.createElement('canvas');c2.width=h;c2.height=w;const x2=c2.getContext('2d');x2.translate(h,0);x2.rotate(Math.PI/2);x2.drawImage(img,0,0,w,h);x2.setTransform(1,0,0,1,0,0);id=x2.getImageData(0,0,h,w);code=window.__zxDecode(id.data,h,w,true);}
         URL.revokeObjectURL(url);
-        if(code&&eanOk(code)){stopScan();dexResolve(code);}else toast('Code non lu : rapproche-toi ou tape les chiffres');
+        if(code&&eanOk(code)){stopScan();scanDone(code);}else toast('Code non lu : rapproche-toi ou tape les chiffres');
       }catch(err){toast('Photo illisible : tape les chiffres du code');}
     };
     img.onerror=()=>toast('Photo illisible');
@@ -1657,6 +1670,35 @@ async function dexResolve(ean){
   }
 }
 
+/* --- Scan depuis le formulaire « Ajouter une bouteille » (cave) --- */
+function scanDone(code){if(SCANMODE==='cave')return caveResolve(code);return dexResolve(code);}
+async function caveResolve(ean){
+  const base=Object.assign({},CAVEPRE||{},{ean:ean});
+  const ex=S.bottles.find(b=>b.ean===ean);
+  if(ex){
+    if(confirm('« '+titleOf(ex)+(ex.vintage?' '+ex.vintage:'')+' » est déjà dans ta cave ('+(+ex.qty||0)+'). Ajouter 1 bouteille ?')){
+      ex.qty=(+ex.qty||0)+1;save();SCANMODE='dex';CAVEPRE=null;closeSheet();renderHome();if(ST.open)renderDetail();toast('Bouteille ajoutée');return;
+    }
+    SCANMODE='dex';
+    openForm(null,null,Object.assign(base,{domaine:ex.domaine,name:ex.name,appellation:ex.appellation,vintage:ex.vintage,color:ex.color,region:ex.region,cepages:ex.cepages,note:'Code déjà présent en cave : vérifie le millésime puis enregistre.'}));return;
+  }
+  const c=S.eans[ean];
+  if(c){SCANMODE='dex';openForm(null,null,Object.assign(base,{domaine:c.domaine,name:c.cuvee,appellation:c.appellation,vintage:c.vintage,color:c.color,note:'Code déjà reconnu : vérifie le millésime puis enregistre.'}));return;}
+  openSheet('<h3 class="sh">Recherche…</h3><p class="note">Je cherche le vin qui correspond au code <b>'+esc(ean)+'</b>.</p><div class="dxspin"></div><div class="sbar"><button class="btn ghost" id="cv-cancel">Annuler</button></div>');
+  const tok={ean:ean};CAVEPEND=tok;
+  $('#cv-cancel').addEventListener('click',()=>{CAVEPEND=null;SCANMODE='dex';openForm(null,null,CAVEPRE);});
+  const r=await offFetch(ean);
+  if(CAVEPEND!==tok)return;
+  CAVEPEND=null;SCANMODE='dex';
+  if(r.p){
+    const v=offParse(r.p);
+    openForm(null,null,Object.assign(base,v.isWine?{domaine:v.domaine,name:v.cuvee,appellation:v.appellation,vintage:v.vintage}:{},v.isWine&&v.color?{color:v.color}:{},{note:v.isWine?'Reconnu dans Open Food Facts : « '+(v.name||'')+' ». Vérifie et corrige si besoin.':'Ce code correspond à « '+(v.name||'un produit')+' » dans Open Food Facts : ça ne ressemble pas à un vin connu, renseigne-le à la main.'}));
+  }else if(r.none){
+    openForm(null,null,Object.assign(base,{note:'Code inconnu de la base ouverte (fréquent pour les petits domaines). Renseigne le vin : je le retiendrai pour ce code-barres.'}));
+  }else{
+    openForm(null,null,Object.assign(base,{note:'Pas de connexion pour identifier le code. Renseigne le vin à la main.'}));
+  }
+}
 /* --- Formulaire de capture --- */
 function openDexForm(v){
   v=v||{};DX.fiche=v.fiche||null;
@@ -1756,7 +1798,7 @@ function openDex(tab){
    +(S.dex.some(e=>e.demo)?'<button class="btn ghost" id="dx-deltest" style="width:100%;margin:0 0 6px">Supprimer les cartes test ('+S.dex.filter(e=>e.demo).length+')</button>':'')
    +'<div class="sbar"><button class="btn ghost" data-close style="flex:none">Fermer</button><button class="btn" id="dx-scan">'+IC.scan.replace('<svg','<svg style="width:20px;height:20px;vertical-align:-4px;margin-right:6px"')+'Scanner</button></div>');
   $('#dxseg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)openDex(b.dataset.t);});
-  $('#dx-scan').addEventListener('click',openScan);
+  $('#dx-scan').addEventListener('click',()=>{SCANMODE='dex';openScan();});
   $('#dx-rar').addEventListener('click',openRar);
   const dt=$('#dx-deltest');if(dt)dt.addEventListener('click',()=>{const n=S.dex.filter(e=>e.demo).length;if(confirm('Supprimer les '+n+' cartes test ?')){S.dex=S.dex.filter(e=>!e.demo);save();renderHome();openDex();toast(n+' cartes test supprimées');}});
   $('#dxbody').addEventListener('click',e=>{
@@ -1804,7 +1846,7 @@ function dexBanner(){
   $('#dbSub').textContent=S.dex.length?S.dex.length+' capture'+(S.dex.length>1?'s':'')+' · '+dexDisc().filter(x=>x.e).length+'/'+dexDisc().length+' appellations':'Scanne ta première bouteille';
 }
 $('#dbGo').innerHTML=IC.scan;
-$('#dexBan').addEventListener('click',e=>{if(e.target.closest('#dbGo'))openScan();else openDex('cap');});
+$('#dexBan').addEventListener('click',e=>{if(e.target.closest('#dbGo')){SCANMODE='dex';openScan();}else openDex('cap');});
 
 seedDex();
 renderHome();
